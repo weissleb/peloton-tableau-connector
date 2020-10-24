@@ -13,7 +13,6 @@
 
         var tableSchemas = [];
 
-        tableau.log("This is your Peloton schema.");
         $.ajax({
             // beforeSend: function (request) {
             //     request.setRequestHeader("Access-Control-Allow-Origin", "*");
@@ -46,11 +45,34 @@
                 tableSchemas.push(tableSchema);
             }
 
+            tableau.log("This is your Peloton schema.");
             schemaCallback(tableSchemas);
         });
     };
 
     myConnector.getData = function (table, doneCallback) {
+        if (table.tableInfo.id == "workouts") {
+            $.ajax({
+                dataType: "json",
+                url: "http://localhost:30000/cycling/data",
+            }).done(function (data) {
+                table.appendRows(data.data);
+            });
+        }
+
+        if (table.tableInfo.id == "dummy") {
+            tableData = []
+            row = {
+                "stringField": "foo", 
+                "intField": 99,
+                "boolField": true,
+                "floatField": 99.9,
+                "dateField": "1976-01-07 11:05:30"
+            };
+            tableData.push(row)
+            table.appendRows(tableData)
+        }
+        tableau.log("This is your Peloton data.");
         doneCallback();
     };
 
