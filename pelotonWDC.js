@@ -43,7 +43,7 @@
     };
 
     myConnector.getData = function (table, doneCallback) {
-        $.getJSON("http://localhost:30000/cycling/data", function(resp) {
+        $.getJSON("http://localhost:30000/cycling/data/" + table.tableInfo.id, function(resp) {
             var tableData = [];
 
             if (table.tableInfo.id == "workouts") {
