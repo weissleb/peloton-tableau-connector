@@ -1,4 +1,6 @@
 (function () {
+    console.log("Console, are you there?")
+
     var myConnector = tableau.makeConnector();
 
     myConnector.getSchema = function (schemaCallback) {
@@ -13,7 +15,7 @@
 
         var tableSchemas = [];
 
-        $.getJSON("http://localhost:30000/cycling/schema?tables=workouts", function(resp) {
+        $.getJSON("http://localhost:30000/cycling/schema?tables=workouts", function (resp) {
             var tables = resp.tables
             for (var t = 0, tlen = tables.length; t < tlen; t++) {
                 // "name", "description", "columns"
@@ -43,7 +45,7 @@
     };
 
     myConnector.getData = function (table, doneCallback) {
-        $.getJSON("http://localhost:30000/cycling/data/" + table.tableInfo.id, function(resp) {
+        $.getJSON("http://localhost:30000/cycling/data/" + table.tableInfo.id, function (resp) {
             var tableData = [];
 
             if (table.tableInfo.id == "workouts") {
@@ -72,11 +74,8 @@
     $(document).ready(function () {
         $("#submitButton").click(function () {
             tableau.connectionName = "Peloton Data Feed";
+            tableau.log("phase: " + tableau.phase);
             tableau.submit();
         });
     });
 })();
-
-function f() {
-    console.log("Fuck you!")
-}
