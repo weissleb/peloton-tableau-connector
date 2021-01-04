@@ -1,5 +1,13 @@
 (function () {
-    console.log("Console, are you there?")
+    function makeid(length) {
+        var result = '';
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        for (var i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+    }
 
     var myConnector = tableau.makeConnector();
 
@@ -15,67 +23,168 @@
 
         var tableSchemas = [];
 
-        $.getJSON("http://localhost:30000/cycling/schema?tables=workouts", function (resp) {
-            var tables = resp.tables
-            for (var t = 0, tlen = tables.length; t < tlen; t++) {
+        msg = "getting schema for workouts";
+        console.log(msg);
+        tableau.log(msg);
+
+        var xhr = $.ajax({
+            url: "cycling/schema/workouts",
+            type: "GET",
+            dataType: 'json',
+            async: false,
+            success: function (data) {
+                var table = data.tables[0];
                 // "name", "description", "columns"
-                var cols = []
-                table = tables[t]
-                columns = table.columns
+                var cols = [];
+                columns = table.columns;
                 for (var c = 0, clen = columns.length; c < clen; c++) {
                     cols.push({
                         "id": columns[c].name,
                         "alias": columns[c].name,
                         "dataType": typeConversion.get(columns[c].goType)
                     });
+
+
+                    var tableSchema = {
+                        id: "workouts",
+                        alias: "workouts",
+                        columns: cols
+                    };
+
+                    tableSchemas.push(tableSchema);
                 }
 
-                var tableSchema = {
-                    id: table.name,
-                    alias: table.name,
-                    columns: cols
-                };
-
-                tableSchemas.push(tableSchema);
+                msg = "successfully got schema for workouts.";
+                console.log(msg);
+                tableau.log(msg);
+                schemaCallback(tableSchemas);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                tableau.log(xhr.responseText + "\n" + thrownError);
+                tableau.abortWithError("error getting schema for workouts");
             }
-
-            tableau.log("This is your Peloton schema.");
-            schemaCallback(tableSchemas);
         });
     };
 
     myConnector.getData = function (table, doneCallback) {
-        $.getJSON("http://localhost:30000/cycling/data/" + table.tableInfo.id, function (resp) {
-            var tableData = [];
+        tableau.log("trying to get data");
+        if (tableau.password.length === 0) {
+            tableau.log("we do not have a token, aborting for auth");
+            tableau.abortForAuth();
+        }
 
-            if (table.tableInfo.id == "workouts") {
-                tableData = resp.data;
-                tableau.log("This is your Peloton data with " + tableData.length + " rows.");
+        tableau.log("DEBUG token: " + tableau.password);
+
+        t = table.tableInfo.id;
+        tableau.log("getting data for " + t);
+
+        var xhr = $.ajax({
+            url: "cycling/data/" + t,
+            type: "GET",
+            dataType: 'json',
+            async: false,
+            headers: {
+                "Authorization": "Bearer " + tableau.password
+            },
+            success: function (data) {
+                var tableData = [];
+
+                if (t === "workouts") {
+                    tableData = data.data;
+                    tableau.log("this is your data for " + t + " with " + tableData.length + " rows.");
+                }
+
+                table.appendRows(tableData);
+                doneCallback();
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                tableau.log(xhr.responseText + "\n" + thrownError);
+                tableau.abortWithError("error getting data for " + t);
             }
-
-            if (table.tableInfo.id == "dummy") {
-                row = {
-                    "stringField": "foo",
-                    "intField": 99,
-                    "boolField": true,
-                    "floatField": 99.9,
-                    "dateField": "1976-01-07 11:05:30"
-                };
-                tableData.push(row)
-            }
-
-            table.appendRows(tableData)
-            doneCallback();
         });
+    };
+
+    // Init function for connector, called during every phase but
+    // only called when running inside the simulator or tableau.
+    myConnector.init = function (initCallback) {
+        tableau.log("random check: " + makeid(6));
+        tableau.log("phase: " + tableau.phase);
+
+        tableau.authType = tableau.authTypeEnum.custom;
+        tableau.connectionName="Peloton Data Connector";
+
+        if (tableau.phase === tableau.phaseEnum.gatherDataPhase) {
+
+            // If we don't have a valid token stored in password, we need to
+            // re-authenticate.
+            if (tableau.password === 0) {
+                tableau.log("gatherDataPhase abortForAuth()");
+                tableau.abortForAuth();
+            } else {
+                tableau.log("gatherDataPhase has password and proceed ahead");
+            }
+        }
+
+        // The problem is this has no idea what to do with what was written into the cookie since it's a session value rather than the actuall token I want.
+        // I either need to figure out how to write the cookie value to be the token itself, or I need to maybe make an ajax call here to receive it back.
+        var accessToken = Cookies.get("peloton_wdc_test");
+        tableau.log("access token from cookie is '" + accessToken + "'");
+        var hasAuth = (accessToken && accessToken.length > 0) || tableau.password.length > 0;
+        updateUIWithAuthState(hasAuth);
+
+        initCallback();
+
+        // If we are not in the data gathering phase, we want to store the token.
+        // This allows us to access the token in the data gathering phase.
+        if (tableau.phase === tableau.phaseEnum.interactivePhase || tableau.phase === tableau.phaseEnum.authPhase) {
+            tableau.log("DEBUG phase " + tableau.phase + " where hasAuth = " + hasAuth + " and accessToken = " + accessToken);
+            if (hasAuth) {
+                tableau.password = accessToken;
+
+                if (tableau.phase === tableau.phaseEnum.authPhase) {
+                    // Auto-submit here if we are in the auth phase
+                    tableau.submit()
+                }
+
+                return;
+            }
+        }
     };
 
     tableau.registerConnector(myConnector);
 
     $(document).ready(function () {
-        $("#submitButton").click(function () {
-            tableau.connectionName = "Peloton Data Feed";
-            tableau.log("phase: " + tableau.phase);
+        var accessToken = Cookies.get("peloton_wdc_test");
+        var hasAuth = accessToken && accessToken.length > 0;
+        updateUIWithAuthState(hasAuth);
+
+        $("#connectlink").click(function() {
+            doAuthRedirect();
+        });
+
+        $("#getcyclingdatalink").click(function() {
+            tableau.connectionName = "Peloton Data Connector";
             tableau.submit();
         });
     });
+
+    // An on-click function for the Login to Peloton link.
+    // This will redirect the user to a login page.
+    function doAuthRedirect() {
+        var url = "login"
+        window.location.href = url;
+    }
+
+    // This function toggles the label shown depending
+    // on whether or not the user has been authenticated.
+    function updateUIWithAuthState(hasAuth) {
+        if (hasAuth) {
+            $(".notsignedin").css('display', 'none');
+            $(".signedin").css('display', 'block');
+        } else {
+            $(".notsignedin").css('display', 'block');
+            $(".signedin").css('display', 'none');
+        }
+    }
+
 })();
