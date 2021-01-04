@@ -14,6 +14,7 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"strings"
+	"time"
 )
 
 // user holds a users account information
@@ -55,6 +56,7 @@ func main() {
 	r.HandleFunc("/", HomeHandler)
 	r.HandleFunc("/peloton-wdc", WdcHandler)
 	r.HandleFunc("/login", authHandler)
+	r.HandleFunc("/token", tokenHandler).Methods(http.MethodPost)
 	r.HandleFunc("/cycling/schema/{table}", cyclingSchema)
 	r.HandleFunc("/cycling/data/{table}", cyclingData)
 
@@ -85,8 +87,6 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	username := os.Getenv("PELO_USER")
 	password := os.Getenv("PELO_PASS")
 
-	session, _ := store.Get(r, "peloton_wdc_test")
-
 	requestUrl := "http://localhost:30000/auth"
 	method := "POST"
 
@@ -113,13 +113,6 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		session.AddFlash("Unauthorized")
-		err = session.Save(r, w)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
 		log.Print("error: could not authenticate")
 		//http.Redirect(w, r, "/forbidden", http.StatusFound)
 		return
@@ -139,25 +132,37 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	log.Printf("DEBUG UserToken from user_token = %s", respData.UserToken)
+	userToken := respData.UserToken
+	log.Printf("DEBUG UserToken from user_token = %s", userToken)
 
-	user := &User{
-		Username:      username,
-		Authenticated: true,
-		UserToken:     respData.UserToken,
-	}
+	// put the token into a cookie named "peloton_wdc_test"
+	expiration := time.Now().Add(time.Minute) //365 * 24 * time.Hour
+	cookie := http.Cookie{Name: "peloton_wdc_test", Value: userToken, Expires: expiration}
+	http.SetCookie(w, &cookie)
 
-	session.Values["user"] = user
-
-
-	err = session.Save(r, w)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	log.Printf("DEBUG: %s", session.Name())
-	log.Printf("DEBUG login: sessionId = %s, userName = %s", session.ID, user.Username)
 	http.Redirect(w, r, "/peloton-wdc", http.StatusFound)
+}
+
+func tokenHandler(w http.ResponseWriter, r *http.Request) {
+	// receive the cookie data in the POST request
+	formData := &struct {
+		Cookie string `json:"cookie"`
+	}{}
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	err = json.Unmarshal(body, formData)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	// de-serialize it into a User object
+
+
+	// return the UserToken
 }
 
 func cyclingSchema(w http.ResponseWriter, r *http.Request) {
