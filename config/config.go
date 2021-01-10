@@ -1,5 +1,7 @@
 package config
 
+var Protocol = "http"
+var Host = "localhost"
 var Port = "8889"
 
 var Banner = `

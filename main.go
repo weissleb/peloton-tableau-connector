@@ -5,12 +5,9 @@ import (
 	"github.com/gorilla/mux"
 	"html/template"
 	"log"
-	"math/rand"
 	"fmt"
 	"github.com/weissleb/peloton-tableau-connector/config"
 	"io/ioutil"
-	"github.com/gorilla/sessions"
-	"os"
 	"encoding/gob"
 	"encoding/json"
 	"strings"
@@ -19,87 +16,63 @@ import (
 
 // user holds a users account information
 type User struct {
-	Username      string
-	Authenticated bool
-	UserToken     string
+	UserName   string
+	FailedAuth bool
 }
-
-// store will hold all session data
-var store *sessions.CookieStore
 
 // tpl holds all parsed templates
 var tpl *template.Template
 
 func init() {
-	authKeyOne := []byte(os.Getenv("FRONTEND_SESSION_KEY"))
-	encryptionKeyOne := []byte(os.Getenv("FRONTEND_SESSION_KEY"))
-
-	store = sessions.NewCookieStore(
-		authKeyOne,
-		encryptionKeyOne,
-	)
-
-	store.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   60 * 15,
-		//HttpOnly: true,
-	}
 
 	gob.Register(User{})
-
 	tpl = template.Must(template.ParseGlob("templates/*.gohtml"))
 }
 
-var layout = "2006-01-02 15:04:05"
-
 func main() {
+
 	r := mux.NewRouter()
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-	r.HandleFunc("/", HomeHandler)
-	r.HandleFunc("/peloton-wdc", WdcHandler)
+	r.HandleFunc("/", WdcHandler)
 	r.HandleFunc("/login", authHandler)
-	r.HandleFunc("/token", tokenHandler).Methods(http.MethodPost)
 	r.HandleFunc("/cycling/schema/{table}", cyclingSchema)
 	r.HandleFunc("/cycling/data/{table}", cyclingData)
 
 	// start server
 	fmt.Println(config.Banner)
-	fmt.Println("connector is at http://localhost:" + config.Port)
-	http.ListenAndServe(":"+config.Port, r)
-}
-
-func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("handling request to %s %s", r.Method, r.URL.Path)
-
-	t := template.Must(template.New("example").ParseFiles("templates/example.html"))
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	rando := rand.Int()
-	log.Print(rando)
-	t.ExecuteTemplate(w, "example.html", struct {
-		Rando int
-	}{
-		Rando: rando,
-	})
+	fmt.Printf("connector is at %s://%s:%s\n", config.Protocol, config.Host, config.Port)
+	log.Fatal(http.ListenAndServe(config.Host+":"+config.Port, r))
 }
 
 func WdcHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("handling request to %s %s", r.Method, r.URL.Path)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	tpl.ExecuteTemplate(w, "pelotonWDC.gohtml", nil)
+
+	user := &User{
+		UserName: "unknown",
+		FailedAuth: false,
+	}
+
+	params := r.URL.Query()
+	userName, ok := params["user"]
+	if ok && len(userName[0]) > 0 {
+		user.UserName = userName[0]
+	}
+	redirectCause, ok := params["redirectCause"]
+	if ok && redirectCause[0] == "authFailed" {
+		user.FailedAuth = true
+	}
+
+	tpl.ExecuteTemplate(w, "pelotonWDC.gohtml", user)
 }
 
 func authHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("handling request to %s %s", r.Method, r.URL.Path)
 
 	var username, password string
-	if r.Method == http.MethodGet {
-		username = os.Getenv("PELO_USER")
-		password = os.Getenv("PELO_PASS")
-	} else if r.Method == http.MethodPost {
-		username = r.FormValue("username")
-		password = r.FormValue("password")
-	}
+	username = r.FormValue("username")
+	password = r.FormValue("password")
 
 	requestUrl := "http://localhost:30000/auth"
 	method := "POST"
@@ -128,7 +101,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 
 	if res.StatusCode != http.StatusOK {
 		log.Print("error: could not authenticate")
-		//http.Redirect(w, r, "/forbidden", http.StatusFound)
+		http.Redirect(w, r, "/?redirectCause=authFailed&user=" + username, http.StatusFound)
 		return
 	}
 
@@ -147,40 +120,25 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err.Error())
 	}
 	userToken := respData.UserToken
-	log.Printf("DEBUG UserToken from user_token = %s", userToken)
+	log.Printf("got token with length %v", len(userToken))
 
-	// put the token into a cookie named "peloton_wdc_test"
-	expiration := time.Now().Add(time.Minute) //365 * 24 * time.Hour
-	cookie := http.Cookie{Name: "peloton_wdc_test", Value: userToken, Expires: expiration}
-	log.Printf("DEGUB: cookie exipiration = %s", cookie.Expires.Format(layout))
-	http.SetCookie(w, &cookie)
+	// put the token and username into cookies
+	expiration := time.Now().Add(time.Hour)
 
-	http.Redirect(w, r, "/peloton-wdc", http.StatusFound)
-}
+	tokenCookie := http.Cookie{
+		Name: "peloton_wdc_token",
+		Value: userToken,
+		Expires: expiration}
 
-// TODO: I don't think I'm calling this.  Should be safe to remove it.
-func tokenHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("handling request to %s %s", r.Method, r.URL.Path)
-
-	// receive the cookie data in the POST request
-	formData := &struct {
-		Cookie string `json:"cookie"`
-	}{}
-
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Fatal(err.Error())
+	userCookie := http.Cookie{
+		Name:    "peloton_wdc_user",
+		Value:   username,
+		Expires: expiration,
 	}
+	http.SetCookie(w, &tokenCookie)
+	http.SetCookie(w, &userCookie)
 
-	err = json.Unmarshal(body, formData)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	// de-serialize it into a User object
-
-
-	// return the UserToken
+	http.Redirect(w, r, "/?user=" + username, http.StatusFound)
 }
 
 func cyclingSchema(w http.ResponseWriter, r *http.Request) {
@@ -222,7 +180,12 @@ func cyclingData(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	table, _ := vars["table"]
 	authHeader := r.Header.Get("Authorization")
-	log.Print("DEBUG authHeader = " + authHeader)
+	if len(authHeader) == 0 {
+		log.Print("error: did not find Authentication header")
+	}
+	if strings.Index(authHeader, "Bearer") != 0 {
+		log.Print("error: the Authentication header is not a Bearer token")
+	}
 	url := "http://localhost:30000/cycling/data/" + table
 	method := "GET"
 	req, err := http.NewRequest(method, url, nil)

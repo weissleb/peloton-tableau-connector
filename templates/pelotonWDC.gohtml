@@ -14,21 +14,23 @@
 
 <body>
     <div style="margin: auto; text-align: center; margin-top: 50px; max-width: 300px">
-        <!-- These labels will toggle depending on whether the user is authenticated or not -->
-        <p class="signedin">You are signed in!</p>
-        <p class="notsignedin">You are not signed in, please Login to Peloton.</p>
-
-        <!-- The Login to Peloton link will have a function added to it in the js-->
+        <!-- These labels will toggle depending on whether the user is authenticated or not. -->
+        <p class="signedin">You are signed in as {{ .UserName }}!</p>
         <div class="notsignedin">
+            {{ if .FailedAuth }}
+                <p>Authentication failed for {{ .UserName }}.  Please try again.</p>
+            {{ else }}
+                <p>You are not signed in, please login to Peloton.</p>
+                <p><i>Your credentials are <u>never stored</u>.</i></p>
+            {{ end }}
             <form action="login" method="POST">
                 <input type="text" name="username" placeholder="username">
                 <input type="password" name="password" placeholder="password" required>
                 <input type="submit" value="Submit">
             </form>
         </div>
-        <br/><br/>
 
-        <!-- This link will pull the user's Peloton cycling data once the user is authenticated -->
+        <!-- This link will pull the user's Peloton cycling data once the user is authenticated. -->
         <p><a href="#" class="signedin" id="getcyclingdatalink">Get Cycling Data</a></p>
     </div>
 </body>

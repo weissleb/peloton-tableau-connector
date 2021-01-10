@@ -1,13 +1,4 @@
 (function () {
-    function makeid(length) {
-        var result = '';
-        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        var charactersLength = characters.length;
-        for (var i = 0; i < length; i++) {
-            result += characters.charAt(Math.floor(Math.random() * charactersLength));
-        }
-        return result;
-    }
 
     var myConnector = tableau.makeConnector();
 
@@ -23,9 +14,7 @@
 
         var tableSchemas = [];
 
-        msg = "getting schema for workouts";
-        console.log(msg);
-        tableau.log(msg);
+        tableau.log("getting schema for workouts");
 
         var xhr = $.ajax({
             url: "cycling/schema/workouts",
@@ -54,7 +43,7 @@
                     tableSchemas.push(tableSchema);
                 }
 
-                msg = "successfully got schema for workouts.";
+                msg = "successfully got schema for workouts";
                 console.log(msg);
                 tableau.log(msg);
                 schemaCallback(tableSchemas);
@@ -73,7 +62,7 @@
             tableau.abortForAuth();
         }
 
-        tableau.log("DEBUG token: " + tableau.password);
+        tableau.log("got token with length of " + tableau.password.length);
 
         t = table.tableInfo.id;
         tableau.log("getting data for " + t);
@@ -91,7 +80,7 @@
 
                 if (t === "workouts") {
                     tableData = data.data;
-                    tableau.log("this is your data for " + t + " with " + tableData.length + " rows.");
+                    tableau.log("this is your data for " + t + " with " + tableData.length + " rows");
                 }
 
                 table.appendRows(tableData);
@@ -107,11 +96,10 @@
     // Init function for connector, called during every phase but
     // only called when running inside the simulator or tableau.
     myConnector.init = function (initCallback) {
-        tableau.log("random check: " + makeid(6));
         tableau.log("phase: " + tableau.phase);
 
         tableau.authType = tableau.authTypeEnum.custom;
-        tableau.connectionName="Peloton Data Connector";
+        // tableau.connectionName="Peloton Data Connector";
 
         if (tableau.phase === tableau.phaseEnum.gatherDataPhase) {
 
@@ -125,8 +113,13 @@
             }
         }
 
-        var accessToken = Cookies.get("peloton_wdc_test");
-        tableau.log("access token from cookie is '" + accessToken + "'");
+        var accessToken = Cookies.get("peloton_wdc_token");
+        var user = Cookies.get("peloton_wdc_user");
+        if (accessToken && accessToken.length > 0) {
+            tableau.log("found cookie with access token of length " + accessToken.length);
+        } else {
+            tableau.log("did not find cookie or token length is not > 0");
+        }
         var hasAuth = (accessToken && accessToken.length > 0) || tableau.password.length > 0;
         updateUIWithAuthState(hasAuth);
 
@@ -135,8 +128,9 @@
         // If we are not in the data gathering phase, we want to store the token.
         // This allows us to access the token in the data gathering phase.
         if (tableau.phase === tableau.phaseEnum.interactivePhase || tableau.phase === tableau.phaseEnum.authPhase) {
-            tableau.log("DEBUG phase " + tableau.phase + " where hasAuth = " + hasAuth + " and accessToken = " + accessToken);
+            tableau.log("phase " + tableau.phase + " where hasAuth = " + hasAuth + " and accessToken with length = " + accessToken.length);
             if (hasAuth) {
+                tableau.username = user;
                 tableau.password = accessToken;
 
                 if (tableau.phase === tableau.phaseEnum.authPhase) {
@@ -152,22 +146,16 @@
     tableau.registerConnector(myConnector);
 
     $(document).ready(function () {
-        var accessToken = Cookies.get("peloton_wdc_test");
+        var accessToken = Cookies.get("peloton_wdc_token");
+        var user = Cookies.get("peloton_wdc_user");
         var hasAuth = accessToken && accessToken.length > 0;
         updateUIWithAuthState(hasAuth);
 
         $("#getcyclingdatalink").click(function() {
-            tableau.connectionName = "Peloton Data Connector";
+            tableau.connectionName = "Peloton Data Connector for " + user;
             tableau.submit();
         });
     });
-
-    // An on-click function for the Login to Peloton link.
-    // This will redirect the user to a login page.
-    function doAuthRedirect() {
-        var url = "login"
-        window.location.href = url;
-    }
 
     // This function toggles the label shown depending
     // on whether or not the user has been authenticated.
