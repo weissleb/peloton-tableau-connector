@@ -50,6 +50,8 @@ func init() {
 	tpl = template.Must(template.ParseGlob("templates/*.gohtml"))
 }
 
+var layout = "2006-01-02 15:04:05"
+
 func main() {
 	r := mux.NewRouter()
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
@@ -67,6 +69,8 @@ func main() {
 }
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("handling request to %s %s", r.Method, r.URL.Path)
+
 	t := template.Must(template.New("example").ParseFiles("templates/example.html"))
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	rando := rand.Int()
@@ -79,13 +83,23 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func WdcHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("handling request to %s %s", r.Method, r.URL.Path)
+
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	tpl.ExecuteTemplate(w, "pelotonWDC.gohtml", nil)
 }
 
 func authHandler(w http.ResponseWriter, r *http.Request) {
-	username := os.Getenv("PELO_USER")
-	password := os.Getenv("PELO_PASS")
+	log.Printf("handling request to %s %s", r.Method, r.URL.Path)
+
+	var username, password string
+	if r.Method == http.MethodGet {
+		username = os.Getenv("PELO_USER")
+		password = os.Getenv("PELO_PASS")
+	} else if r.Method == http.MethodPost {
+		username = r.FormValue("username")
+		password = r.FormValue("password")
+	}
 
 	requestUrl := "http://localhost:30000/auth"
 	method := "POST"
@@ -138,12 +152,16 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	// put the token into a cookie named "peloton_wdc_test"
 	expiration := time.Now().Add(time.Minute) //365 * 24 * time.Hour
 	cookie := http.Cookie{Name: "peloton_wdc_test", Value: userToken, Expires: expiration}
+	log.Printf("DEGUB: cookie exipiration = %s", cookie.Expires.Format(layout))
 	http.SetCookie(w, &cookie)
 
 	http.Redirect(w, r, "/peloton-wdc", http.StatusFound)
 }
 
+// TODO: I don't think I'm calling this.  Should be safe to remove it.
 func tokenHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("handling request to %s %s", r.Method, r.URL.Path)
+
 	// receive the cookie data in the POST request
 	formData := &struct {
 		Cookie string `json:"cookie"`
@@ -167,6 +185,7 @@ func tokenHandler(w http.ResponseWriter, r *http.Request) {
 
 func cyclingSchema(w http.ResponseWriter, r *http.Request) {
 	log.Printf("handling request to %s %s", r.Method, r.URL.Path)
+
 	client := &http.Client{}
 	vars := mux.Vars(r)
 	table, _ := vars["table"]
@@ -198,6 +217,7 @@ func cyclingSchema(w http.ResponseWriter, r *http.Request) {
 
 func cyclingData(w http.ResponseWriter, r *http.Request) {
 	log.Printf("handling request to %s %s", r.Method, r.URL.Path)
+
 	client := &http.Client{}
 	vars := mux.Vars(r)
 	table, _ := vars["table"]

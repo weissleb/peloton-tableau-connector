@@ -125,8 +125,6 @@
             }
         }
 
-        // The problem is this has no idea what to do with what was written into the cookie since it's a session value rather than the actuall token I want.
-        // I either need to figure out how to write the cookie value to be the token itself, or I need to maybe make an ajax call here to receive it back.
         var accessToken = Cookies.get("peloton_wdc_test");
         tableau.log("access token from cookie is '" + accessToken + "'");
         var hasAuth = (accessToken && accessToken.length > 0) || tableau.password.length > 0;
@@ -157,10 +155,6 @@
         var accessToken = Cookies.get("peloton_wdc_test");
         var hasAuth = accessToken && accessToken.length > 0;
         updateUIWithAuthState(hasAuth);
-
-        $("#connectlink").click(function() {
-            doAuthRedirect();
-        });
 
         $("#getcyclingdatalink").click(function() {
             tableau.connectionName = "Peloton Data Connector";

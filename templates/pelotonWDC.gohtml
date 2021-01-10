@@ -19,7 +19,13 @@
         <p class="notsignedin">You are not signed in, please Login to Peloton.</p>
 
         <!-- The Login to Peloton link will have a function added to it in the js-->
-        <a href="#" class="notsignedin" id="connectlink">Login to Peloton</a>
+        <div class="notsignedin">
+            <form action="login" method="POST">
+                <input type="text" name="username" placeholder="username">
+                <input type="password" name="password" placeholder="password" required>
+                <input type="submit" value="Submit">
+            </form>
+        </div>
         <br/><br/>
 
         <!-- This link will pull the user's Peloton cycling data once the user is authenticated -->
