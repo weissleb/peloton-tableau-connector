@@ -34,6 +34,7 @@ func main() {
 	r := mux.NewRouter()
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	r.HandleFunc("/", WdcHandler)
+	r.Handle("/peloton-wdc", http.RedirectHandler("/", http.StatusFound))
 	r.HandleFunc("/login", authHandler)
 	r.HandleFunc("/cycling/schema/{table}", cyclingSchema)
 	r.HandleFunc("/cycling/data/{table}", cyclingData)

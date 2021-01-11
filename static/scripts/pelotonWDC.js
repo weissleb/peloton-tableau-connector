@@ -26,11 +26,28 @@
                 // "name", "description", "columns"
                 var cols = [];
                 columns = table.columns;
+
                 for (var c = 0, clen = columns.length; c < clen; c++) {
+                    var columnRole;
+                    if (columns[c].name == "DurationSeconds" || columns[c].name == "RideDifficulty" || columns[c].name == "StartTimeSeconds") {
+                        columnRole = tableau.columnRoleEnum.dimension.valueOf();
+                    } else {
+                        columnRole = undefined;
+                    }
+                    var columnType;
+                    if (columns[c].name == "DurationSeconds" || columns[c].name == "RideDifficulty") {
+                        columnType = tableau.columnTypeEnum.discrete.valueOf();
+                    }
+                    else {
+                        columnType = undefined;
+                    }
+                    // tableau.log("DEBUG: column " + columns[c].name + " has role of " + columnRole + " and type of " + columnType);
                     cols.push({
                         "id": columns[c].name,
                         "alias": columns[c].name,
-                        "dataType": typeConversion.get(columns[c].goType)
+                        "dataType": typeConversion.get(columns[c].goType),
+                        "columnRole": columnRole,
+                        "columnType": columnType,
                     });
 
 
