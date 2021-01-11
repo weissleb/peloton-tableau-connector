@@ -106,7 +106,7 @@ At this time, the only way to run this is to build and run the lightweight Go ex
 > The instructions here are for Mac, tested using `go1.15.2` and `Tableau Desktop 2020.3`.
 
 ## Install Go
-If you do not have Go, or have a version older than `go1.11`, get it or updade it.  As usual with Mac, the smoothest way is using [Homebrew](https://formulae.brew.sh/formula/go).  However, you can also install from the official [Go website](https://golang.org/doc/install).
+If you do not have Go, or have a version older than `go1.11`, get it or update it.  As usual with Mac, the smoothest way is using [Homebrew](https://formulae.brew.sh/formula/go).  However, you can also install from the official [Go website](https://golang.org/doc/install).
 
 ```shell script
 brew install go
@@ -137,6 +137,7 @@ git clone https://github.com/weissleb/peloton-tableau-connector.git && cd peloto
 ```
 
 > This is a one-time task, unless you want to pull any updates using `git pull` from inside the repo's directory.
+
 Build the executable.
 
 ```shell script
@@ -171,6 +172,7 @@ Enter your Peloton credentials.
 ![login](doc-images/login.png)
 
 Extract your data.
+
 ![get data](doc-images/get-data.png)
 
 Build useful and beautiful reports and dashboards.
@@ -178,10 +180,10 @@ Build useful and beautiful reports and dashboards.
 ![dashboard](doc-images/dashboard.png)
 
 ## Shutdown
-As noted above, the connector and REST server are stateless.  Once you're done, and you've saved your Tableau workbook, feel free to shit them both down.  A simple `ctrl+c` in each terminal will do the trick.
+As noted above, the connector and REST server are stateless.  Once you're done, and you've saved your Tableau workbook, feel free to shut them both down.  A simple `ctrl+c` in each terminal will do the trick.
 
 ## Restart
-If you ever want to pull new data from Peloton into your Tableau workbook, simply open two terminal windows and start both components (_assuming both repo's were cloned into $HOME and built as shown above_).
+If you ever want to pull new data from Peloton into your Tableau workbook, simply open two terminal windows and start both components (_assuming both repo's were cloned into `$HOME` and built as shown above_).
 
 In first terminal ...
 ```shell script
