@@ -1,8 +1,15 @@
 package config
 
+import "time"
+
+const LogLevel = "INFO"
+
 var Protocol = "http"
 var Host = "localhost"
 var Port = "8889"
+var RequireAuth = true
+var UseWorkoutCache = true
+var CacheExpireSeconds = 30
 
 var Banner = `
     ____       __      __            
@@ -11,3 +18,8 @@ var Banner = `
  / ____/  __/ / /_/ / /_/ /_/ / / / /
 /_/    \___/_/\____/\__/\____/_/ /_/ 
 `
+
+var PeloPageLimit int
+var PeloAllPages = true
+
+var OutputFileName = "data_" + time.Now().UTC().Format("20060102150405") + ".csv"

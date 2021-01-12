@@ -118,7 +118,7 @@ The REST server is not publicly available in Github at this time.  However, I wi
 Please submit an issue on this repo asking for access to the REST server if you're interested.  Once granted access, you can use the `README` there to build and run the REST server.  Ultimately, once built, you should be able to run the following (_assuming you cloned the repo to `$HOME`_).
 
 ```shell script
->_ $HOME/peloton-data-extractor/rest
+>_ $HOME/peloton-data-extractor/servicehandlers
 
     ____       __      __            
    / __ \___  / /___  / /_____  ____
@@ -126,7 +126,7 @@ Please submit an issue on this repo asking for access to the REST server if you'
  / ____/  __/ / /_/ / /_/ /_/ / / / /
 /_/    \___/_/\____/\__/\____/_/ /_/ 
 
-rest is at http://localhost:30000
+servicehandlers is at http://localhost:30000
 ```
 
 ## Build and Run the Connector
@@ -187,7 +187,7 @@ If you ever want to pull new data from Peloton into your Tableau workbook, simpl
 
 In first terminal ...
 ```shell script
->_ $HOME/peloton-data-extractor/rest
+>_ $HOME/peloton-data-extractor/servicehandlers
 
     ____       __      __            
    / __ \___  / /___  / /_____  ____
@@ -195,7 +195,7 @@ In first terminal ...
  / ____/  __/ / /_/ / /_/ /_/ / / / /
 /_/    \___/_/\____/\__/\____/_/ /_/ 
 
-rest is at http://localhost:30000
+servicehandlers is at http://localhost:30000
 ```
 
 In second terminal ...
