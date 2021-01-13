@@ -36,7 +36,7 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 			log.Print("returning non-expired workouts cache hit for user " + user)
 			return workouts.workouts, nil
 		}
-		log.Print("deleting expired workouts cache hit for user" + user)
+		log.Print("deleting expired workouts cache hit for user " + user)
 		delete(workoutsCache, user)
 	}
 
@@ -147,12 +147,15 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 		}
 	}
 
-	workoutsCache[user] = struct {
-		expire   time.Time
-		workouts Workouts
-	}{
-		expire:   time.Now().Add(time.Second * time.Duration(config.CacheExpireSeconds)),
-		workouts: workouts,
+	if config.UseWorkoutCache {
+		log.Print("caching workouts for user " + user)
+		workoutsCache[user] = struct {
+			expire   time.Time
+			workouts Workouts
+		}{
+			expire:   time.Now().Add(time.Second * time.Duration(config.CacheExpireSeconds)),
+			workouts: workouts,
+		}
 	}
 
 	if config.LogLevel == "DEBUG" {
