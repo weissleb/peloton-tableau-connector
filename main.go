@@ -102,7 +102,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	username = r.FormValue("username")
 	password = r.FormValue("password")
 
-	requestUrl := fmt.Sprintf("%s://%s:%s/service/auth", config.Protocol, config.Host, config.Port)
+	requestUrl := fmt.Sprintf("%s://:%s/service/auth", config.Protocol, config.Port)
 	method := "POST"
 
 	payload := strings.NewReader(fmt.Sprintf(`{
@@ -175,7 +175,7 @@ func cyclingSchema(w http.ResponseWriter, r *http.Request) {
 	client := &http.Client{}
 	vars := mux.Vars(r)
 	table, _ := vars["table"]
-	url := fmt.Sprintf("%s://%s:%s/service/cycling/schema?tables=%s", config.Protocol, config.Host, config.Port, table)
+	url := fmt.Sprintf("%s://:%s/service/cycling/schema?tables=%s", config.Protocol, config.Port, table)
 	method := "GET"
 	req, err := http.NewRequest(method, url, nil)
 
@@ -214,7 +214,7 @@ func cyclingData(w http.ResponseWriter, r *http.Request) {
 	if strings.Index(authHeader, "Bearer") != 0 {
 		log.Print("error: the Authentication header is not a Bearer token")
 	}
-	url := fmt.Sprintf("%s://%s:%s/service/cycling/data/%s", config.Protocol, config.Host, config.Port, table)
+	url := fmt.Sprintf("%s://:%s/service/cycling/data/%s", config.Protocol, config.Port, table)
 	method := "GET"
 	req, err := http.NewRequest(method, url, nil)
 	req.Header.Add("Authorization", authHeader)
