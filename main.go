@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"strings"
 	"time"
+	"github.com/weissleb/peloton-tableau-connector/service/servicehandlers"
 )
 
 // user holds a users account information
@@ -32,16 +33,42 @@ func init() {
 func main() {
 
 	r := mux.NewRouter()
+
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+
 	r.HandleFunc("/", WdcHandler)
 	r.Handle("/peloton-wdc", http.RedirectHandler("/", http.StatusFound))
 	r.HandleFunc("/login", authHandler)
 	r.HandleFunc("/cycling/schema/{table}", cyclingSchema)
 	r.HandleFunc("/cycling/data/{table}", cyclingData)
 
+	r.HandleFunc("/service/auth", servicehandlers.PostUserSession).
+		Methods(http.MethodPost, http.MethodOptions)
+	r.HandleFunc("/service/auth/check", servicehandlers.CheckAuth).
+		Methods(http.MethodGet, http.MethodOptions)
+	r.HandleFunc("/service/cycling/schema", servicehandlers.GetSimpleCyclingSchemas).
+		Methods(http.MethodGet, http.MethodOptions)
+	r.HandleFunc("/service/cycling/data/{table}", servicehandlers.GetCyclingDataJson).
+		Methods(http.MethodGet, http.MethodOptions)
+	r.HandleFunc("/service/cycling/summary", servicehandlers.GetCyclingDataSummary).
+		Methods(http.MethodGet, http.MethodOptions)
+
 	// start server
 	fmt.Println(config.Banner)
 	fmt.Printf("connector is at %s://%s:%s\n", config.Protocol, config.Host, config.Port)
+
+	authMessage := "off"
+	if config.RequireAuth {
+		authMessage = "on"
+	}
+	log.Printf("authentication is %s", authMessage)
+
+	cacheMessage := "off"
+	if config.UseWorkoutCache {
+		cacheMessage = "on"
+	}
+	log.Printf("caching of workouts is %s", cacheMessage)
+
 	log.Fatal(http.ListenAndServe(config.Host+":"+config.Port, r))
 }
 
@@ -51,7 +78,7 @@ func WdcHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	user := &User{
-		UserName: "unknown",
+		UserName:   "unknown",
 		FailedAuth: false,
 	}
 
@@ -75,7 +102,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	username = r.FormValue("username")
 	password = r.FormValue("password")
 
-	requestUrl := "http://localhost:30000/auth"
+	requestUrl := fmt.Sprintf("%s://:%s/service/auth", config.Protocol, config.Port)
 	method := "POST"
 
 	payload := strings.NewReader(fmt.Sprintf(`{
@@ -102,7 +129,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 
 	if res.StatusCode != http.StatusOK {
 		log.Print("error: could not authenticate")
-		http.Redirect(w, r, "/?redirectCause=authFailed&user=" + username, http.StatusFound)
+		http.Redirect(w, r, "/?redirectCause=authFailed&user="+username, http.StatusFound)
 		return
 	}
 
@@ -127,8 +154,8 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	expiration := time.Now().Add(time.Hour)
 
 	tokenCookie := http.Cookie{
-		Name: "peloton_wdc_token",
-		Value: userToken,
+		Name:    "peloton_wdc_token",
+		Value:   userToken,
 		Expires: expiration}
 
 	userCookie := http.Cookie{
@@ -139,7 +166,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &tokenCookie)
 	http.SetCookie(w, &userCookie)
 
-	http.Redirect(w, r, "/?user=" + username, http.StatusFound)
+	http.Redirect(w, r, "/?user="+username, http.StatusFound)
 }
 
 func cyclingSchema(w http.ResponseWriter, r *http.Request) {
@@ -148,7 +175,7 @@ func cyclingSchema(w http.ResponseWriter, r *http.Request) {
 	client := &http.Client{}
 	vars := mux.Vars(r)
 	table, _ := vars["table"]
-	url := "http://localhost:30000/cycling/schema?tables=" + table
+	url := fmt.Sprintf("%s://:%s/service/cycling/schema?tables=%s", config.Protocol, config.Port, table)
 	method := "GET"
 	req, err := http.NewRequest(method, url, nil)
 
@@ -187,7 +214,7 @@ func cyclingData(w http.ResponseWriter, r *http.Request) {
 	if strings.Index(authHeader, "Bearer") != 0 {
 		log.Print("error: the Authentication header is not a Bearer token")
 	}
-	url := "http://localhost:30000/cycling/data/" + table
+	url := fmt.Sprintf("%s://:%s/service/cycling/data/%s", config.Protocol, config.Port, table)
 	method := "GET"
 	req, err := http.NewRequest(method, url, nil)
 	req.Header.Add("Authorization", authHeader)
