@@ -127,10 +127,10 @@ go build -o wdc github.com/weissleb/peloton-tableau-connector
 
 > This is a one-time task, unless you'll pulled any updates from the repo using `git pull`, and would like to build the connector with those changes.
 
-Start the connector (you can change the Port if you'd like at `config/config.go`).
+Set the port (e.g. 8889) and start the connector.
 
 ```shell script
->_ ./wdc 
+>_ export PORT=8889 && ./wdc
 
     ____       __      __            
    / __ \___  / /___  / /_____  ____
@@ -138,15 +138,19 @@ Start the connector (you can change the Port if you'd like at `config/config.go`
  / ____/  __/ / /_/ / /_/ /_/ / / / /
 /_/    \___/_/\____/\__/\____/_/ /_/ 
 
-connector is at http://localhost:8889
+connector is on port 8889
 2021/01/14 21:50:32 authentication is on
 2021/01/14 21:50:32 caching of workouts is off
 ```
 
+_If necessary, allow connections._
+
+![allow](doc-images/allow-connections.png)
+
 ## Connect with Tableau Desktop
 Install [Tableau Desktop](https://public.tableau.com/en-us/s/download), if you haven't already.
 
-Open Tableau, and use the Web Data Connector option.  Enter the URL which was output to the screen on the previous step (e.g. http://localhost:8889).
+Open Tableau, and use the Web Data Connector option.  Enter `http://localhost:` and the `port` (e.g `http://localhost:8889`).
 
 ![connect](doc-images/connect.png)
 
@@ -169,7 +173,7 @@ As noted above, the connector is stateless.  Once you're done, and you've saved 
 When you want to pull new data from Peloton into your Tableau workbook, simply open a terminal window and start the connector (_assuming the repo was cloned into `$HOME` and built as shown above_).
 
 ```shell script
->_ $HOME/peloton-tableau-connector/wdc 
+>_ export PORT=8889 && $HOME/peloton-tableau-connector/wdc 
 
     ____       __      __            
    / __ \___  / /___  / /_____  ____
@@ -177,7 +181,7 @@ When you want to pull new data from Peloton into your Tableau workbook, simply o
  / ____/  __/ / /_/ / /_/ /_/ / / / /
 /_/    \___/_/\____/\__/\____/_/ /_/ 
 
-connector is at http://localhost:8889
+connector is on port 8889
 2021/01/14 21:50:32 authentication is on
 2021/01/14 21:50:32 caching of workouts is off
 ```

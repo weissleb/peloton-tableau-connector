@@ -4,9 +4,6 @@ import "time"
 
 const LogLevel = "INFO"
 
-var Protocol = "http"
-var Host = "localhost"
-var Port = "8889"
 var RequireAuth = true
 var UseWorkoutCache = false
 var CacheExpireSeconds = 30
