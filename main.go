@@ -31,16 +31,15 @@ func init() {
 
 	gob.Register(User{})
 	tpl = template.Must(template.ParseGlob("templates/*.gohtml"))
-
-	port = os.Getenv("PORT")
-
-	if port == "" {
-		port = config.Port
-		log.Printf("could not find $PORT, using PORT %s from config", port)
-	}
 }
 
 func main() {
+
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		log.Fatal("$PORT must be set")
+	}
 
 	r := mux.NewRouter()
 
@@ -80,7 +79,7 @@ func main() {
 	}
 	log.Printf("caching of workouts is %s", cacheMessage)
 
-	log.Fatal(http.ListenAndServe(":" + config.Port, r))
+	log.Fatal(http.ListenAndServe(":" + port, r))
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request)  {
@@ -123,7 +122,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	username = r.FormValue("username")
 	password = r.FormValue("password")
 
-	requestUrl := fmt.Sprintf("%s://:%s/service/auth", config.Protocol, config.Port)
+	requestUrl := fmt.Sprintf("%s://:%s/service/auth", "http", port)
 	method := "POST"
 
 	payload := strings.NewReader(fmt.Sprintf(`{
@@ -196,7 +195,7 @@ func cyclingSchema(w http.ResponseWriter, r *http.Request) {
 	client := &http.Client{}
 	vars := mux.Vars(r)
 	table, _ := vars["table"]
-	url := fmt.Sprintf("%s://:%s/service/cycling/schema?tables=%s", config.Protocol, config.Port, table)
+	url := fmt.Sprintf("%s://:%s/service/cycling/schema?tables=%s", "http", port, table)
 	method := "GET"
 	req, err := http.NewRequest(method, url, nil)
 
@@ -235,7 +234,7 @@ func cyclingData(w http.ResponseWriter, r *http.Request) {
 	if strings.Index(authHeader, "Bearer") != 0 {
 		log.Print("error: the Authentication header is not a Bearer token")
 	}
-	url := fmt.Sprintf("%s://:%s/service/cycling/data/%s", config.Protocol, config.Port, table)
+	url := fmt.Sprintf("%s://:%s/service/cycling/data/%s", "http", port, table)
 	method := "GET"
 	req, err := http.NewRequest(method, url, nil)
 	req.Header.Add("Authorization", authHeader)
