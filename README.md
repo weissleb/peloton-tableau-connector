@@ -1,13 +1,15 @@
 # Peloton Tableau Connector
 This is a [Tableau Web Data Connector](https://tableau.github.io/webdataconnector/#) for visualizing your personal Peloton cycling data inside of Tableau.
 
+> DISCLAIMER
+> If you've come here looking for good, clean, idiomatic Go code, this is _not_ the repo you are looking for.  Move along ...
 # Status
 It's early days for this connector, but I hope, given good feedback, it will progress quickly.
 
 ## Availability
-Currently (as of Jan 14, 2021), this is not available online anywhere, but can be used locally if you're willing to install and run a lightweight Go executable.  My intent is expose this publicly and submit it as a [Community Connector](https://tableau.github.io/webdataconnector/community/).
+Currently (as of Jan 16, 2021), this is publicly available online in an alpha release, but likely is unstable.  After receiving feedback and doing a little more testing, my intent is submit this as a [Community Connector](https://tableau.github.io/webdataconnector/community/). 
 
-For now, see [Usage](#usage) if you'd like to try it out, and provide feedback.
+If you'd like to try the online connector (rather than running it locally), you can head over to [Connect with Tableau Desktop](#connect-with-tableau-desktop), and use the public URL provided.  Or, you can use this locally if you're willing to install and run a lightweight Go executable.  See [Usage](#usage) if you'd like to try it out, and provide feedback.
 
 ## Tables
 This initial version is aimed only at cycling classes.  I built the schema such that I could analyze my personal record ("PR") trends.  For example, do I PR during certain times of day, or days of the week, or with certain instructors?
@@ -150,7 +152,7 @@ _If necessary, allow connections._
 ## Connect with Tableau Desktop
 Install [Tableau Desktop](https://public.tableau.com/en-us/s/download), if you haven't already.
 
-Open Tableau, and use the Web Data Connector option.  Enter `http://localhost:` and the `port` (e.g `http://localhost:8889`).
+Open Tableau, and use the Web Data Connector option.  If you're running this locally, enter `http://localhost:` and the `port` (e.g `http://localhost:8889`).  If you're connecting to the online version (currently in alpha, and likely unstable), enter `https://warm-shore-62344.herokuapp.com`.
 
 ![connect](doc-images/connect.png)
 
