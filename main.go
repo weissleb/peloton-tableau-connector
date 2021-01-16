@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 	"github.com/weissleb/peloton-tableau-connector/service/servicehandlers"
+	"os"
 )
 
 // user holds a users account information
@@ -24,10 +25,19 @@ type User struct {
 // tpl holds all parsed templates
 var tpl *template.Template
 
+var port string
+
 func init() {
 
 	gob.Register(User{})
 	tpl = template.Must(template.ParseGlob("templates/*.gohtml"))
+
+	port = os.Getenv("PORT")
+
+	if port == "" {
+		port = config.Port
+		log.Printf("could not find $PORT, using PORT %s from config", port)
+	}
 }
 
 func main() {
@@ -36,6 +46,7 @@ func main() {
 
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
+	r.HandleFunc("/home", homeHandler)
 	r.HandleFunc("/", WdcHandler)
 	r.Handle("/peloton-wdc", http.RedirectHandler("/", http.StatusFound))
 	r.HandleFunc("/login", authHandler)
@@ -55,7 +66,7 @@ func main() {
 
 	// start server
 	fmt.Println(config.Banner)
-	fmt.Printf("connector is at %s://%s:%s\n", config.Protocol, config.Host, config.Port)
+	fmt.Printf("connector is at %s://%s:%s\n", config.Protocol, config.Host, port)
 
 	authMessage := "off"
 	if config.RequireAuth {
@@ -70,6 +81,16 @@ func main() {
 	log.Printf("caching of workouts is %s", cacheMessage)
 
 	log.Fatal(http.ListenAndServe(config.Host+":"+config.Port, r))
+}
+
+func homeHandler(w http.ResponseWriter, r *http.Request)  {
+
+	http.SetCookie(w, &http.Cookie{
+		Name:  "peloton_wdc_host",
+		Value: r.Host,
+	})
+
+	tpl.ExecuteTemplate(w, "home.gohtml", nil)
 }
 
 func WdcHandler(w http.ResponseWriter, r *http.Request) {
