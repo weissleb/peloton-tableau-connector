@@ -66,7 +66,7 @@ func main() {
 
 	// start server
 	fmt.Println(config.Banner)
-	fmt.Printf("connector is at %s://%s:%s\n", config.Protocol, config.Host, port)
+	fmt.Printf("connector is on port %s\n", port)
 
 	authMessage := "off"
 	if config.RequireAuth {
@@ -80,7 +80,7 @@ func main() {
 	}
 	log.Printf("caching of workouts is %s", cacheMessage)
 
-	log.Fatal(http.ListenAndServe(config.Host+":"+config.Port, r))
+	log.Fatal(http.ListenAndServe(":" + config.Port, r))
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request)  {
