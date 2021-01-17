@@ -19,6 +19,27 @@ type session struct {
 	UserId    string `json:"user_id"`
 }
 
+// List of workouts exported from /api/user/{userId}/workout_history_csv
+type exportedWorkouts []exportedWorkout
+
+type exportedWorkout struct {
+	StartTime         string  `csv:"Workout Timestamp"`
+	LiveOrOnDemand    string  `csv:"Live/On-Demand"`
+	Instructor        string  `csv:"Instructor Name"`
+	LengthMinutes     int     `csv:"Length (minutes)"`
+	FitnessDiscipline string  `csv:"Fitness Discipline"`
+	ClassType         string  `csv:"Type"`
+	ClassTitle        string  `csv:"Title"`
+	TotalOutput       int     `csv:"Total Output"`
+	AvgWatts          int     `csv:"Avg. Watts"`
+	AvgResistance     string  `csv:"Avg. Resistance"`
+	AvgCadenceRPM     int     `csv:"Avg. Cadence (RPM)"`
+	AvgSpeedMPH       float64 `csv:"Avg. Speed (mph)"`
+	DistanceMiles     float64 `csv:"Distance (mi)"`
+	CaloriesBurned    int     `csv:"Calories Burned"`
+	AvgHeartRate      float64 `csv:"Avg. Heartrate"`
+}
+
 // List of workouts returned from /api/user/{userId}/workouts
 type workouts struct {
 	Workouts  []workout `json:"data"`
@@ -33,7 +54,7 @@ type workout struct {
 	CurrentPr        bool    `json:"is_total_work_personal_record"`
 	Wtype            string  `json:"fitness_discipline"`
 	Status           string  `json:"status"`
-	Output           float32 `json:"total_work"`
+	Output           float64 `json:"total_work"`
 	Ride             ride    `json:"ride"`
 }
 
@@ -48,7 +69,7 @@ type ride struct {
 		Name     string `json:"name"`
 		ImageURL string `json:"about_image_url"`
 	} `json:"instructor"`
-	Difficulty_Rating float32 `json:"difficulty_rating_avg"`
+	Difficulty_Rating float64 `json:"difficulty_rating_avg"`
 	Difficulty_Level  string  `json:"difficulty_level"`
 	Equipmenttags     []struct {
 		Slug string `json:"slug"`

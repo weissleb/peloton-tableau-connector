@@ -4,11 +4,10 @@ import (
 	"time"
 	"sort"
 	"log"
-	"sync"
-	"strings"
 	"github.com/weissleb/peloton-tableau-connector/config"
 	"github.com/weissleb/peloton-tableau-connector/service/peloservice"
-	"github.com/luci/luci-go/common/runtime/goroutine"
+	"strings"
+	"strconv"
 )
 
 var layout = "2006-01-02 15:04:05"
@@ -27,7 +26,7 @@ func init() {
 	})
 }
 
-// Figure out a way to not have to pass in HttpClientInteface here.
+// Gets dataset from the peloservice and transforms it for our needs.
 func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 
 	user := client.GetSessionUser()
@@ -41,6 +40,46 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 	}
 
 	workouts := Workouts{}
+	extractTime := time.Now().UTC()
+	exportedWorkouts, err := peloservice.GetExportedWorkouts(*client.getHttpClient(), *client.getUserSession())
+	if err != nil {
+		return workouts, err
+	}
+	if len(exportedWorkouts) == 0 {
+		return nil, nil
+	}
+
+	layout := "2006-01-02 15:04 (MST)"
+	for _, w := range exportedWorkouts {
+		startTime, _ := time.Parse(layout, w.StartTime)
+		timeZone, _ := startTime.Zone()
+		avgResistenceInt, _ := strconv.Atoi(strings.TrimRight(w.AvgResistance, "%s"))
+		avgResistence := float64(avgResistenceInt) / 100.00
+		workouts = append(workouts, Workout{
+			ExtractTimeUTC:    extractTime,
+			StartTime:         startTime,
+			TimeZone:          timeZone,
+			StartTimeUTC:      startTime.UTC(),
+			Type:              w.ClassType,
+			RideTitle:         w.ClassTitle,
+			Instructor:        w.Instructor,
+			RideLengthMinutes: w.LengthMinutes,
+			Output:            w.TotalOutput,
+			AvgWatts:          w.AvgWatts,
+			AvgResistance:     avgResistence,
+			AvgCadenceRPM:     w.AvgCadenceRPM,
+			AvgSpeedMPH:       w.AvgSpeedMPH,
+			DistanceMiles:     w.DistanceMiles,
+			CaloriesBurned:    w.CaloriesBurned,
+			AvgHeartRate:      w.AvgHeartRate,
+		})
+	}
+
+	/*
+	 * This section pulls the workouts from the API, rather than using the CSV export.
+	 * I may add some of this back later to assign the Id, RideDifficulty, RideLevel, InstructorImageURL,
+	 * and HasWeights fields.
+
 	page := uint16(0)
 	hasNext := true
 
@@ -48,14 +87,14 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 	// also will query workouts in pages.
 	for ; hasNext; page++ {
 		// Let's add a retry loop.
-		_workouts, err := peloservice.GetWorkouts(*client.getHttpClient(), *client.getUserSession(), page)
+		exportedWorkouts, err := peloservice.GetWorkouts(*client.getHttpClient(), *client.getUserSession(), page)
 		if err != nil {
 			return workouts, err
 		}
 		if config.LogLevel == "DEBUG" {
-			log.Printf("DEBUG: got workouts for page %v of %v", page, _workouts.PageCount-1)
+			log.Printf("DEBUG: got workouts for page %v of %v", page, exportedWorkouts.PageCount-1)
 		}
-		hasNext = _workouts.HasNext
+		hasNext = exportedWorkouts.HasNext
 		// We can set this config to false if we want to test by only getting a single page.
 		// Working through all the pages could be a little slow because of subsequent peloservice for ride data.
 		if !config.PeloAllPages {
@@ -63,37 +102,20 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 			hasNext = false
 		}
 
-		if len(_workouts.Workouts) == 0 {
+		if len(exportedWorkouts.Workouts) == 0 {
 			return nil, nil
 		}
 
-		for _, w := range _workouts.Workouts {
+		for _, w := range exportedWorkouts.Workouts {
 			if w.Wtype != "cycling" {
 				continue
 			}
-			workout := Workout{
-				ExtractTimeUTC:   time.Now().UTC(),
-				Id:               w.Id,
-				StartTimeSeconds: w.StartTimeSeconds,
-				StartTimeUTC:     time.Unix(int64(w.StartTimeSeconds), 0).UTC(),
-				TimeZone:         w.Timezone,
-				Output:           w.Output,
-				WasPR:            false, // set later
-				HasWeights:       false, // set later
-				CurrentPR:        w.CurrentPr,
-				Type:             w.Wtype,
-				Status:           w.Status,
-				RideId:           w.Ride.Id,
-				RideTitle:        w.Ride.Title,
-				DurationSeconds:  w.Ride.Duration,
-				RideDifficulty:   w.Ride.Difficulty_Rating,
-				RideLevel:        w.Ride.Difficulty_Level,
-			}
-			loc, _ := time.LoadLocation(w.Timezone)
-			workout.StartTime = time.Unix(int64(w.StartTimeSeconds), 0).In(loc)
-
-			workouts = append(workouts, workout)
+			// Gather up workouts so we can later assign Id, RideDifficulty, RideLevel,
+			// InstructorImageURL and then HasWeights.
 		}
+
+		// The following is really only necessary to get the HasWeights flag.
+		// It gets instructor URL too, but meh.
 
 		var waitGroup sync.WaitGroup
 		for i, _ := range workouts {
@@ -125,25 +147,36 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 
 		waitGroup.Wait()
 	}
+	*/
 
-	// sort the workouts
-	if config.LogLevel == "DEBUG" {
-		log.Printf("DEBUG: sorting %d workouts", workouts.Len())
-	}
-	sort.Sort(workouts)
-
+	// sort the workouts by StartTime
 	// iterate the workouts and set WasPR
-	prMap := make(map[uint16]float32)
+	sort.Sort(workouts)
+	prMap := make(map[int]int)
 	for i, workout := range workouts {
-		if prMap[workout.DurationSeconds] == 0 {
-			prMap[workout.DurationSeconds] = workout.Output
+		if prMap[workout.RideLengthMinutes] == 0 {
+			prMap[workout.RideLengthMinutes] = workout.Output
 			continue
 		}
 
-		if prMap[workout.DurationSeconds] < workout.Output {
-			prMap[workout.DurationSeconds] = workout.Output
+		if prMap[workout.RideLengthMinutes] < workout.Output {
+			prMap[workout.RideLengthMinutes] = workout.Output
 			workouts[i].WasPR = true
 			//log.Printf("Got PR for %d min ride on %s.", workout.DurationSeconds/60, workout.StartTime.Format(layout))
+		}
+	}
+
+	// sort workouts in reverse order by StartTime
+	// find the first (i.e. last) WasPR, and set it to CurrentPR
+	sort.Sort(sort.Reverse(workouts))
+	crSet := make(map[int]bool)
+	for i, workout := range workouts {
+		if crSet[workout.RideLengthMinutes] {
+			continue
+		}
+		if workouts[i].WasPR {
+			workouts[i].CurrentPR = true
+			crSet[workout.RideLengthMinutes] = true
 		}
 	}
 
@@ -155,12 +188,6 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 		}{
 			expire:   time.Now().Add(time.Second * time.Duration(config.CacheExpireSeconds)),
 			workouts: workouts,
-		}
-	}
-
-	if config.LogLevel == "DEBUG" {
-		for i, _ := range workouts {
-			log.Printf("workout %s has instructor %s", workouts[i].Id, workouts[i].Instructor)
 		}
 	}
 

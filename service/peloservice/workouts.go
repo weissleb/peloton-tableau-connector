@@ -7,7 +7,39 @@ import (
 	"encoding/json"
 	"github.com/weissleb/peloton-tableau-connector/service/clients"
 	"github.com/weissleb/peloton-tableau-connector/config"
+	"github.com/gocarina/gocsv"
 )
+
+func GetExportedWorkouts(client clients.HttpClientInterface, session UserSession) (exportedWorkouts, error) {
+	var err error
+	workouts := exportedWorkouts{}
+
+	path := fmt.Sprintf("/api/user/%s/workout_history_csv", session.UserId)
+	requesturl := BaseUrl + path
+	method := "GET"
+
+	var (
+		req  *http.Request
+		res  *http.Response
+		body []byte
+	)
+
+	req, err = http.NewRequest(method, requesturl, nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+	req.Header.Add("Cookie", fmt.Sprintf(session.Cookies))
+
+	res, err = client.Do(req)
+	defer res.Body.Close()
+	body, err = ioutil.ReadAll(res.Body)
+
+	if err != nil {
+		return workouts, err
+	}
+	gocsv.UnmarshalBytes(body, &workouts)
+	return workouts, nil
+}
 
 func GetWorkouts(client clients.HttpClientInterface, session UserSession, page uint16) (workouts, error) {
 
