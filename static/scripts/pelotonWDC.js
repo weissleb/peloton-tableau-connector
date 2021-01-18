@@ -5,10 +5,12 @@
     myConnector.getSchema = function (schemaCallback) {
         let typeConversion = new Map();
         typeConversion.set("string", tableau.dataTypeEnum.string);
+        typeConversion.set("int", tableau.dataTypeEnum.int);
         typeConversion.set("int32", tableau.dataTypeEnum.int);
         typeConversion.set("uint16", tableau.dataTypeEnum.int);
         typeConversion.set("uint64", tableau.dataTypeEnum.int);
         typeConversion.set("float32", tableau.dataTypeEnum.float);
+        typeConversion.set("float64", tableau.dataTypeEnum.float);
         typeConversion.set("bool", tableau.dataTypeEnum.bool);
         typeConversion.set("time.Time", tableau.dataTypeEnum.datetime);
 
@@ -28,32 +30,52 @@
                 columns = table.columns;
 
                 for (var c = 0, clen = columns.length; c < clen; c++) {
+
                     var columnRole;
-                    if (columns[c].name == "DurationSeconds" || columns[c].name == "RideDifficulty" || columns[c].name == "StartTimeSeconds") {
+                    if (columns[c].name == "RideLengthMinutes" || columns[c].name == "RideDifficulty" || columns[c].name == "StartTimeSeconds") {
                         columnRole = tableau.columnRoleEnum.dimension.valueOf();
                     } else {
                         columnRole = undefined;
                     }
+
                     var columnType;
-                    if (columns[c].name == "DurationSeconds" || columns[c].name == "RideDifficulty") {
+                    if (columns[c].name == "RideLengthMinutes" || columns[c].name == "RideDifficulty") {
                         columnType = tableau.columnTypeEnum.discrete.valueOf();
-                    }
-                    else {
+                    } else {
                         columnType = undefined;
                     }
-                    // tableau.log("DEBUG: column " + columns[c].name + " has role of " + columnRole + " and type of " + columnType);
+
+                    var numberFormat;
+                    if (columns[c].name == "AvgResistance") {
+                        numberFormat = tableau.numberFormatEnum.percentage.valueOf();
+                    } else {
+                        numberFormat = undefined;
+                    }
+
+                    var aggType;
+                    if (columns[c].name.startsWith("Avg")) {
+                        aggType = tableau.aggTypeEnum.avg.valueOf();
+                    } else {
+                        aggType = undefined;
+                    }
+
+                    tableau.log("DEBUG: column " + columns[c].name + " has role of " + columnRole + ", type of " + columnType +
+                        " numberFormat of " + numberFormat + " and aggType of " + aggType);
                     cols.push({
                         "id": columns[c].name,
                         "alias": columns[c].name,
                         "dataType": typeConversion.get(columns[c].goType),
                         "columnRole": columnRole,
                         "columnType": columnType,
+                        "numberFormat": numberFormat,
+                        "aggType": aggType
                     });
 
 
                     var tableSchema = {
                         id: "workouts",
-                        alias: "workouts",
+                        alias: "Workouts",
+                        description: "Cycling workout with summary metrics.",
                         columns: cols
                     };
 
@@ -168,7 +190,7 @@
         var hasAuth = accessToken && accessToken.length > 0;
         updateUIWithAuthState(hasAuth);
 
-        $("#getcyclingdatalink").click(function() {
+        $("#getcyclingdatalink").click(function () {
             tableau.connectionName = "Peloton Data Connector for " + user;
             tableau.submit();
         });
