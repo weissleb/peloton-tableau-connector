@@ -3,107 +3,52 @@ This is a [Tableau Web Data Connector](https://tableau.github.io/webdataconnecto
 
 > DISCLAIMER
 > If you've come here looking for good, clean, idiomatic Go code, this is _not_ the repo you are looking for.  Move along ...
+
 # Status
-It's early days for this connector, but I hope, given good feedback, it will progress quickly.
+It's early days for this connector, but I hope, given good feedback, it will progress quickly.  This also means you may encounter bugs, or breaking schema changes.
 
 ## Availability
-Currently (as of Jan 16, 2021), this is publicly available online in an alpha release, but likely is unstable.  After receiving feedback and doing a little more testing, my intent is submit this as a [Community Connector](https://tableau.github.io/webdataconnector/community/). 
+Currently (as of Jan 18, 2021), this is publicly available online in an alpha release, but may be unstable.  You can visit the home page [here](https://warm-shore-62344.herokuapp.com/home).
+
+After receiving feedback and doing a little more testing, my intent is submit this as a [Community Connector](https://tableau.github.io/webdataconnector/community/). 
 
 If you'd like to try the online connector (rather than running it locally), you can head over to [Connect with Tableau Desktop](#connect-with-tableau-desktop), and use the public URL provided.  Or, you can use this locally if you're willing to install and run a lightweight Go executable.  See [Usage](#usage) if you'd like to try it out, and provide feedback.
 
 ## Tables
 This initial version is aimed only at cycling classes.  I built the schema such that I could analyze my personal record ("PR") trends.  For example, do I PR during certain times of day, or days of the week, or with certain instructors?
 
-Therefore, there's only one table right now, called `workouts`.  It provides one row for each completed cycling workout.  The raw schema is as follows.
+Therefore, there's only one table right now, called `Workouts`.  It provides one row for each completed cycling workout.  The raw schema is as follows.
 
 ```json
 {
-  "name": "workouts",
+  "name":"Workouts", "description":"Cycling workout with summary metrics.",
   "columns": [
-    {
-      "name": "ExtractTimeUTC",
-      "goType": "time.Time"
-    },
-    {
-      "name": "Id",
-      "goType": "string"
-    },
-    {
-      "name": "StartTimeSeconds",
-      "goType": "uint64"
-    },
-    {
-      "name": "TimeZone",
-      "goType": "string"
-    },
-    {
-      "name": "StartTimeUTC",
-      "goType": "time.Time"
-    },
-    {
-      "name": "StartTime",
-      "goType": "time.Time"
-    },
-    {
-      "name": "Output",
-      "goType": "float32"
-    },
-    {
-      "name": "WasPR",
-      "goType": "bool"
-    },
-    {
-      "name": "CurrentPR",
-      "goType": "bool"
-    },
-    {
-      "name": "Type",
-      "goType": "string"
-    },
-    {
-      "name": "Status",
-      "goType": "string"
-    },
-    {
-      "name": "RideId",
-      "goType": "string"
-    },
-    {
-      "name": "RideTitle",
-      "goType": "string"
-    },
-    {
-      "name": "RideDifficulty",
-      "goType": "float32"
-    },
-    {
-      "name": "RideLevel",
-      "goType": "string"
-    },
-    {
-      "name": "Instructor",
-      "goType": "string"
-    },
-    {
-      "name": "InstructorImageURL",
-      "goType": "string"
-    },
-    {
-      "name": "DurationSeconds",
-      "goType": "uint16"
-    },
-    {
-      "name": "HasWeights",
-      "goType": "bool"
-    }
+    {"name":"ExtractTimeUTC", "goType":"time.Time"},
+    {"name":"StartTime", "goType":"time.Time"},
+    {"name":"TimeZone", "goType":"string"},
+    {"name":"StartTimeUTC", "goType":"time.Time"},
+    {"name":"WasPR", "goType":"bool"},
+    {"name":"CurrentPR", "goType":"bool"},
+    {"name":"Type", "goType":"string"},
+    {"name":"RideTitle", "goType":"string"},
+    {"name":"Instructor", "goType":"string"},
+    {"name":"RideLengthMinutes", "goType":"int"},
+    {"name":"Output", "goType":"int"},
+    {"name":"AvgWatts", "goType":"int"},
+    {"name":"AvgResistance", "goType":"float64"}, 
+    {"name":"AvgCadenceRPM", "goType":"int"},
+    {"name":"AvgSpeedMPH", "goType":"float64"},
+    {"name":"DistanceMiles", "goType":"float64"},
+    {"name":"CaloriesBurned", "goType":"int"},
+    {"name":"AvgHeartRate","goType":"float64"}
   ]
 }
 ```
 
-As feedback rolls in, more tables will be added.
+As feedback rolls in, more tables may be added.
 
 # Usage
-At this time, the only way to run this is to build and run the lightweight Go executable the connector.  No storage is used, and this is completely stateless, meaning it can be shut down and started up at any time.
+At this time, the only way to run this locally is to build and run the lightweight Go executable.  No storage is used, and this is completely stateless, meaning it can be shut down and started up at any time.
 
 > The instructions here are for Mac, tested using `go1.15.2` and `Tableau Desktop 2020.3`.
 

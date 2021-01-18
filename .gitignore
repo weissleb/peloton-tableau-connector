@@ -2,3 +2,4 @@
 go.sum
 wdc
 bin/
+csvtest/
