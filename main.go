@@ -44,6 +44,7 @@ func main() {
 	r := mux.NewRouter()
 
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	r.PathPrefix("/doc-images/").Handler(http.StripPrefix("/doc-images/", http.FileServer(http.Dir("doc-images"))))
 
 	r.HandleFunc("/home", homeHandler)
 	r.HandleFunc("/", WdcHandler)
