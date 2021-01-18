@@ -8,7 +8,9 @@ This is a [Tableau Web Data Connector](https://tableau.github.io/webdataconnecto
 It's early days for this connector, but I hope, given good feedback, it will progress quickly.  This also means you may encounter bugs, or breaking schema changes.
 
 ## Availability
-Currently (as of Jan 18, 2021), this is publicly available online in an alpha release, but may be unstable.  After receiving feedback and doing a little more testing, my intent is submit this as a [Community Connector](https://tableau.github.io/webdataconnector/community/). 
+Currently (as of Jan 18, 2021), this is publicly available online in an alpha release, but may be unstable.  You can visit the home page [here](https://warm-shore-62344.herokuapp.com/home).
+
+After receiving feedback and doing a little more testing, my intent is submit this as a [Community Connector](https://tableau.github.io/webdataconnector/community/). 
 
 If you'd like to try the online connector (rather than running it locally), you can head over to [Connect with Tableau Desktop](#connect-with-tableau-desktop), and use the public URL provided.  Or, you can use this locally if you're willing to install and run a lightweight Go executable.  See [Usage](#usage) if you'd like to try it out, and provide feedback.
 
