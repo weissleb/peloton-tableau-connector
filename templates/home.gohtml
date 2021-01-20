@@ -3,169 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <title>Peloton Tableau Web Data Connector</title>
-
-    <style>
-        table, th, td {
-            border: 1px solid gray;
-            border-collapse: collapse;
-        }
-
-        th {
-            text-align: left;
-        }
-
-        th, td {
-            padding: 10px;
-        }
-
-    </style>
+    <link rel="stylesheet" href="../static/css/pelostyle.css"/>
 </head>
 <body>
-<h1>Peloton Tableau Web Data Connector</h1>
+<div class="container">
+    <h1>Peloton Tableau Web Data Connector</h1>
 
-This is a <a href="https://tableau.github.io/webdataconnector/#" target="_blank">Tableau Web Data Connector</a> for
-visualizing your personal Peloton cycling data inside of Tableau. See how, at <a href="#connect-with-tableau">Connect
-    with Tableau Desktop</a>
-<p></p>
-<img src="../doc-images/dashboard.png" width="75%">
+    This is a <a href="https://tableau.github.io/webdataconnector/#" target="_blank">Tableau Web Data Connector</a> for
+    visualizing your personal Peloton cycling data inside of Tableau. See how, at <a href="#connect-with-tableau">Connect
+        with Tableau Desktop</a>
+    <p></p>
+    <img src="../doc-images/dashboard.png" style="align-content: center; width: 90%; border: solid 1px #e4e7eb"/>
 
-<h2>Status</h2>
+    <h2>Status</h2>
 
-It's early days for this connector, but I hope, given good feedback, it will progress quickly. This also means you may
-encounter bugs, or breaking schema changes.
-<p></p>
-Currently, this is publicly available online in an alpha release, but may be unstable. After receiving feedback and
-doing a little more testing, my intent is submit this as a <a
-        href="https://tableau.github.io/webdataconnector/community/" target="_blank">Community Connector.</a>
-<p></p>
-If you'd like, to run the connector locally, find the code on <a
-        href="https://github.com/weissleb/peloton-tableau-connector" target="_blank">Github</a>. <img
-        src="../static/images/GitHub-Mark-64px-small.png">  And feel free to <a
-        href="https://github.com/weissleb/peloton-tableau-connector/issues" target="_blank">submit an issue</a> if you
-encounter one.
+    It's early days for this connector, but I hope, given good feedback, it will progress quickly. This also means you
+    may
+    encounter bugs, or breaking schema changes.
+    <p></p>
+    Currently, this is publicly available online in an alpha release, but may be unstable. After receiving feedback and
+    doing a little more testing, my intent is submit this as a <a
+            href="https://tableau.github.io/webdataconnector/community/" target="_blank">Community Connector.</a>
+    <p></p>
+    If you'd like, to run the connector locally, find the code on <a
+            href="https://github.com/weissleb/peloton-tableau-connector" target="_blank">Github</a>. <img
+            src="../static/images/GitHub-Mark-64px-small.png"> And feel free to <a
+            href="https://github.com/weissleb/peloton-tableau-connector/issues" target="_blank">submit an issue</a> if
+    you
+    encounter one.
 
-<h2>Tables</h2>
-This initial version is aimed only at cycling classes. I built the schema such that I could analyze my personal record
-("PR") trends. For example, do I PR during certain times of day, or days of the week, or with certain instructors?
-<p></p>
-Therefore, there's only one table right now, called `Workouts`. It provides one row for each completed cycling
-workout.
-The raw schema is as follows.
-<p></p>
-<h3>Workouts</h3>
-<i>Cycling workout with summary metrics. One row per ride.</i>
-<p></p>
+    <h2 id="connect-with-tableau">Connect with Tableau Desktop</h2>
+    <ol>
+        <li>
+            Install <a href="https://public.tableau.com/en-us/s/download" target="_blank">Tableau Desktop</a>, if you
+            haven't
+            already.
+        </li>
+        <li>
+            Open Tableau, and use the <b>Web Data Connector</b> option. If you're connecting to the online version
+            (currently in
+            alpha, and likely unstable), enter <code>https://warm-shore-62344.herokuapp.com</code>.
+        </li>
+        <li>
+            Enter your Peloton credentials.
+        </li>
+        <li>
+            Extract your data.
+        </li>
+        <li>
+            Build useful and beautiful reports and dashboards.
+        </li>
+    </ol>
 
-<table>
-    <tr>
-        <th>Field Alias</th>
-        <th>Data Type</th>
-        <th>Description</th>
-    </tr>
-    <tr>
-        <td>Extract Time UTC</td>
-        <td>Datetime</td>
-        <td>The time in UTC that the data were extracted from Peloton.</td>
-    </tr>
-    <tr>
-        <td>Start Time</td>
-        <td>Datetime</td>
-        <td>The local time you started the class.</td>
-    </tr>
-    <tr>
-        <td>Time Zone</td>
-        <td>String</td>
-        <td>The time zone you were in when you took the class.</td>
-    </tr>
-    <tr>
-        <td>Start Time UTC</td>
-        <td>Datetime</td>
-        <td>The time in UTC you started the class.</td>
-    </tr>
-    <tr>
-        <td>Was PR</td>
-        <td>Boolean</td>
-        <td>Indicates whether or not you achieved a personal record in this workout for the ride length.</td>
-    </tr>
-    <tr>
-        <td>Current PR</td>
-        <td>Boolean</td>
-        <td>Indicates whether or not this workout is your current personal record for the ride length</td>
-    </tr>
-    <tr>
-        <td>Type</td>
-        <td>String</td>
-        <td>The type of ride such as Beginner, Climb, Live DJ, Intervals, Music, etc.</td>
-    </tr>
-    <tr>
-        <td>Ride Title</td>
-        <td>String</td>
-        <td>The descriptive title of the ride.</td>
-    </tr>
-    <tr>
-        <td>Instructor</td>
-        <td>String</td>
-        <td>The name of the ride instructor.</td>
-    </tr>
-    <tr>
-        <td>Ride Length Minutes</td>
-        <td>Integer</td>
-        <td>The length in minutes the ride was scheduled for.</td>
-    </tr>
-    <tr>
-        <td>Output</td>
-        <td>Integer</td>
-        <td>The total output in kj.</td>
-    </tr>
-    <tr>
-        <td>Avg Watts</td>
-        <td>Integer</td>
-        <td>The average output in watts.</td>
-    </tr>
-    <tr>
-        <td>Avg Resistence</td>
-        <td>Float</td>
-        <td>The average resistance as a percentage.</td>
-    </tr>
-    <tr>
-        <td>Avg Cadence RPM</td>
-        <td>Integer</td>
-        <td>The average cadence in rpm.</td>
-    </tr>
-    <tr>
-        <td>Avg Speed MPH</td>
-        <td>Float</td>
-        <td>The average speed in mph.</td>
-    </tr>
-    <tr>
-        <td>Distance Miles</td>
-        <td>Float</td>
-        <td>The total distance traveled in miles.</td>
-    </tr>
-    <tr>
-        <td>Calories Burned</td>
-        <td>Integer</td>
-        <td>The total calories burned in kcal.</td>
-    </tr>
-    <tr>
-        <td>Avg Heart Rate</td>
-        <td>Float</td>
-        <td>The average heart rate in bpm.</td>
-    </tr>
-</table>
-<p></p>
-<h2 id="connect-with-tableau">Connect with Tableau Desktop</h2>
-Install <a href="https://public.tableau.com/en-us/s/download" target="_blank">Tableau Desktop</a>, if you haven't
-already.
-<p></p>
-Open Tableau, and use the <b>Web Data Connector</b> option. If you're connecting to the online version (currently in
-alpha, and likely unstable), enter <code>https://warm-shore-62344.herokuapp.com</code>.
-<p></p>
-Enter your Peloton credentials.<br>
-<p></p>
-Extract your data.<br>
-<p></p>
-Build useful and beautiful reports and dashboards.<br>
-<p></p>
+    <h2>Tables</h2>
+    This initial version is aimed only at cycling classes. I built the schema such that I could analyze my personal
+    record
+    ("PR") trends. For example, do I PR during certain times of day, or days of the week, or with certain instructors?
+    <p></p>
+    Therefore, there's only one table right now, called `Workouts`. It provides one row for each completed cycling
+    workout.
+    The raw schema is as follows.
+    <p></p>
+    <h3>Workouts</h3>
+    <i>Cycling workout with summary metrics. One row per ride.</i>
+    <p></p>
+    <table>
+        <tr>
+            <th>Field Alias</th>
+            <th>Data Type</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td>Extract Time UTC</td>
+            <td>Datetime</td>
+            <td>The time in UTC that the data were extracted from Peloton.</td>
+        </tr>
+        <tr>
+            <td>Start Time</td>
+            <td>Datetime</td>
+            <td>The local time you started the class.</td>
+        </tr>
+        <tr>
+            <td>Time Zone</td>
+            <td>String</td>
+            <td>The time zone you were in when you took the class.</td>
+        </tr>
+        <tr>
+            <td>Start Time UTC</td>
+            <td>Datetime</td>
+            <td>The time in UTC you started the class.</td>
+        </tr>
+        <tr>
+            <td>Was PR</td>
+            <td>Boolean</td>
+            <td>Indicates whether or not you achieved a personal record in this workout for the ride length.</td>
+        </tr>
+        <tr>
+            <td>Current PR</td>
+            <td>Boolean</td>
+            <td>Indicates whether or not this workout is your current personal record for the ride length</td>
+        </tr>
+        <tr>
+            <td>Type</td>
+            <td>String</td>
+            <td>The type of ride such as Beginner, Climb, Live DJ, Intervals, Music, etc.</td>
+        </tr>
+        <tr>
+            <td>Ride Title</td>
+            <td>String</td>
+            <td>The descriptive title of the ride.</td>
+        </tr>
+        <tr>
+            <td>Instructor</td>
+            <td>String</td>
+            <td>The name of the ride instructor.</td>
+        </tr>
+        <tr>
+            <td>Ride Length Minutes</td>
+            <td>Integer</td>
+            <td>The length in minutes the ride was scheduled for.</td>
+        </tr>
+        <tr>
+            <td>Output</td>
+            <td>Integer</td>
+            <td>The total output in kj.</td>
+        </tr>
+        <tr>
+            <td>Avg Watts</td>
+            <td>Integer</td>
+            <td>The average output in watts.</td>
+        </tr>
+        <tr>
+            <td>Avg Resistence</td>
+            <td>Float</td>
+            <td>The average resistance as a percentage.</td>
+        </tr>
+        <tr>
+            <td>Avg Cadence RPM</td>
+            <td>Integer</td>
+            <td>The average cadence in rpm.</td>
+        </tr>
+        <tr>
+            <td>Avg Speed MPH</td>
+            <td>Float</td>
+            <td>The average speed in mph.</td>
+        </tr>
+        <tr>
+            <td>Distance Miles</td>
+            <td>Float</td>
+            <td>The total distance traveled in miles.</td>
+        </tr>
+        <tr>
+            <td>Calories Burned</td>
+            <td>Integer</td>
+            <td>The total calories burned in kcal.</td>
+        </tr>
+        <tr>
+            <td>Avg Heart Rate</td>
+            <td>Float</td>
+            <td>The average heart rate in bpm.</td>
+        </tr>
+    </table>
+</div>
 </body>
 </html>

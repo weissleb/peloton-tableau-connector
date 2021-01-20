@@ -1,0 +1,34 @@
+/* pelostyle.css */
+.container {
+    width: 75%;
+    margin: 0 auto;
+    font-family: 'Pelotare Sans', sans-serif;
+    font-size: 14px;
+    color: #202020;
+}
+
+h1, h2, h3, h4 {
+    color: #222529;
+}
+
+a {
+    color: #5a6474;
+    font-weight: bold;
+}
+
+table, th, td {
+    border: 1px solid #5a6474;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+}
+
+th, td {
+    padding: 10px;
+}
+
+ol {
+    line-height: 25px;
+}
