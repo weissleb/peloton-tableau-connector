@@ -19,33 +19,28 @@ This initial version is aimed only at cycling classes.  I built the schema such 
 
 Therefore, there's only one table right now, called `Workouts`.  It provides one row for each completed cycling workout.  The raw schema is as follows.
 
-```json
-{
-  "name":"Workouts", "description":"Cycling workout with summary metrics.",
-  "columns": [
-    {"name":"ExtractTimeUTC", "goType":"time.Time"},
-    {"name":"StartTime", "goType":"time.Time"},
-    {"name":"TimeZone", "goType":"string"},
-    {"name":"StartTimeUTC", "goType":"time.Time"},
-    {"name":"WasPR", "goType":"bool"},
-    {"name":"CurrentPR", "goType":"bool"},
-    {"name":"Type", "goType":"string"},
-    {"name":"RideTitle", "goType":"string"},
-    {"name":"Instructor", "goType":"string"},
-    {"name":"RideLengthMinutes", "goType":"int"},
-    {"name":"Output", "goType":"int"},
-    {"name":"AvgWatts", "goType":"int"},
-    {"name":"AvgResistance", "goType":"float64"}, 
-    {"name":"AvgCadenceRPM", "goType":"int"},
-    {"name":"AvgSpeedMPH", "goType":"float64"},
-    {"name":"DistanceMiles", "goType":"float64"},
-    {"name":"CaloriesBurned", "goType":"int"},
-    {"name":"AvgHeartRate","goType":"float64"}
-  ]
-}
-```
+|Field Alias|Data Type|Description|
+|--- |--- |--- |
+|Extract Time UTC|Datetime|The time in UTC that the data were extracted from Peloton.|
+|Start Time|Datetime|The local time you started the class.|
+|Time Zone|String|The time zone you were in when you took the class.|
+|Start Time UTC|Datetime|The time in UTC you started the class.|
+|Was PR|Boolean|Indicates whether or not you achieved a personal record in this workout for the ride length.|
+|Current PR|Boolean|Indicates whether or not this workout is your current personal record for the ride length|
+|Type|String|The type of ride such as Beginner, Climb, Live DJ, Intervals, Music, etc.|
+|Ride Title|String|The descriptive title of the ride.|
+|Instructor|String|The name of the ride instructor.|
+|Ride Length Minutes|Integer|The length in minutes the ride was scheduled for.|
+|Output|Integer|The total output in kj.|
+|Avg Watts|Integer|The average output in watts.|
+|Avg Resistence|Float|The average resistance as a percentage.|
+|Avg Cadence RPM|Integer|The average cadence in rpm.|
+|Avg Speed MPH|Float|The average speed in mph.|
+|Distance Miles|Float|The total distance traveled in miles.|
+|Calories Burned|Integer|The total calories burned in kcal.|
+|Avg Heart Rate|Float|The average heart rate in bpm.|
 
-As feedback rolls in, more tables may be added.
+As feedback rolls in, more fields and tables may be added.
 
 # Usage
 At this time, the only way to run this locally is to build and run the lightweight Go executable.  No storage is used, and this is completely stateless, meaning it can be shut down and started up at any time.
