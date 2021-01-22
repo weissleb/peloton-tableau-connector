@@ -47,8 +47,9 @@ func main() {
 	r.PathPrefix("/doc-images/").Handler(http.StripPrefix("/doc-images/", http.FileServer(http.Dir("doc-images"))))
 
 	r.HandleFunc("/home", homeHandler)
-	r.HandleFunc("/", WdcHandler)
-	r.Handle("/peloton-wdc", http.RedirectHandler("/", http.StatusFound))
+	r.Handle("/", http.RedirectHandler("/home", http.StatusFound))
+	r.Handle("/peloton-wdc", http.RedirectHandler("/wdc", http.StatusFound))
+	r.HandleFunc("/wdc", WdcHandler)
 	r.HandleFunc("/login", authHandler)
 	r.HandleFunc("/cycling/schema/{table}", cyclingSchema)
 	r.HandleFunc("/cycling/data/{table}", cyclingData)
@@ -154,7 +155,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 
 	if res.StatusCode != http.StatusOK {
 		log.Print("error: could not authenticate")
-		http.Redirect(w, r, "/?redirectCause=authFailed&user="+username, http.StatusFound)
+		http.Redirect(w, r, "/wdc?redirectCause=authFailed&user="+username, http.StatusFound)
 		return
 	}
 
@@ -191,7 +192,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &tokenCookie)
 	http.SetCookie(w, &userCookie)
 
-	http.Redirect(w, r, "/?user="+username, http.StatusFound)
+	http.Redirect(w, r, "/wdc?user="+username, http.StatusFound)
 }
 
 func cyclingSchema(w http.ResponseWriter, r *http.Request) {

@@ -7,6 +7,16 @@
     color: #202020;
 }
 
+.notice {
+    margin: 10px auto;
+    padding: 5px 20px;
+    border-radius: 2px;
+    font-family: 'Pelotare Sans', sans-serif;
+    font-size: 14px;
+    color: #202020;
+    background-color: #e4e7eb;
+}
+
 h1, h2, h3, h4 {
     color: #222529;
 }

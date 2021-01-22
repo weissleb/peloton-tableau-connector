@@ -8,7 +8,11 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-1FXCMQDZ2K"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
         gtag('js', new Date());
 
         gtag('config', 'G-1FXCMQDZ2K');
@@ -18,6 +22,21 @@
 <body>
 <div class="container">
     <h1>Peloton Tableau Web Data Connector</h1>
+
+    <section class="notice">
+        <p>
+        If you've reached this page from inside Tableau, trying to connect to or refresh a Data Source, please add a
+        new Web Data Connector Data Source by replacing <span style="font-family: 'Courier New'">/home</span> with <span style="font-family: 'Courier New'">/wdc</span> in the URL (e.g. <span style="font-family: 'Courier New'">https://warm-shore-62344.herokuapp.com/wdc</span>).
+        </p>
+        <p>
+        You can then replace your existing Data Source following <a href="https://help.tableau.com/current/pro/desktop/en-us/connect_basic_replace.htm" target="_blank">
+            these instructions</a>. You can then close your original Data Source, and all your reports and dashboards
+        should work just fine.
+        </p>
+        <p>
+            Sorry for any inconvenience.
+        </p>
+    </section>
 
     This is a <a href="https://tableau.github.io/webdataconnector/#" target="_blank">Tableau Web Data Connector</a> for
     visualizing your personal Peloton cycling data inside of Tableau. See how, at <a href="#connect-with-tableau">Connect
@@ -52,7 +71,7 @@
         <li>
             Open Tableau, and use the <b>Web Data Connector</b> option. If you're connecting to the online version
             (currently in
-            alpha, and likely unstable), enter <code>https://warm-shore-62344.herokuapp.com</code>.
+            alpha, and likely unstable), enter <code>https://warm-shore-62344.herokuapp.com/wdc</code>.
         </li>
         <li>
             Enter your Peloton credentials.

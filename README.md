@@ -92,7 +92,7 @@ _If necessary, allow connections._
 ## Connect with Tableau Desktop
 Install [Tableau Desktop](https://public.tableau.com/en-us/s/download), if you haven't already.
 
-Open Tableau, and use the Web Data Connector option.  If you're running this locally, enter `http://localhost:` and the `port` (e.g `http://localhost:8889`).  If you're connecting to the online version (currently in alpha, and likely unstable), enter `https://warm-shore-62344.herokuapp.com`.
+Open Tableau, and use the Web Data Connector option.  If you're running this locally, enter `http://localhost:<port>/wdc` (e.g `http://localhost:8889/wdc`).  If you're connecting to the online version (currently in alpha, and likely unstable), enter `https://warm-shore-62344.herokuapp.com/wdc`.
 
 ![connect](doc-images/connect.png)
 
