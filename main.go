@@ -14,6 +14,15 @@ import (
 	"time"
 	"github.com/weissleb/peloton-tableau-connector/service/servicehandlers"
 	"os"
+	"net"
+	"github.com/weissleb/peloton-tableau-connector/googleanalytics"
+	"github.com/gofrs/uuid"
+	"crypto/sha1"
+)
+
+const (
+	appName    = "PelotonTableauConnector"
+	appVersion = "0.1.0"
 )
 
 // user holds a users account information
@@ -27,6 +36,9 @@ var tpl *template.Template
 
 var port string
 
+// google analytics
+var gaTrackingId string
+
 func init() {
 
 	gob.Register(User{})
@@ -36,6 +48,9 @@ func init() {
 func main() {
 
 	port = os.Getenv("PORT")
+	gaTrackingId = os.Getenv("GA_TID")
+	//gaSecret = os.Getenv("GA_SECRET")
+	//gaMeasurementId = os.Getenv("GA_MID")
 
 	if port == "" {
 		log.Fatal("$PORT must be set")
@@ -81,10 +96,10 @@ func main() {
 	}
 	log.Printf("caching of workouts is %s", cacheMessage)
 
-	log.Fatal(http.ListenAndServe(":" + port, r))
+	log.Fatal(http.ListenAndServe(":"+port, r))
 }
 
-func homeHandler(w http.ResponseWriter, r *http.Request)  {
+func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, &http.Cookie{
 		Name:  "peloton_wdc_host",
@@ -114,6 +129,25 @@ func WdcHandler(w http.ResponseWriter, r *http.Request) {
 		user.FailedAuth = true
 	}
 
+	if len(gaTrackingId) > 0 {
+		event := googleanalytics.Event{
+			TrackingId:     gaTrackingId,
+			CustomerId:     uuid.Must(uuid.NewV4()).String(),
+			EventType:      "pageview",
+			DocPath:        "/wdc",
+			DocTitle:       "wdc home",
+			DocHost:        r.Host,
+			AppName:        appName,
+			AppVersion:     appVersion,
+			CampaignSource: "Tableau",
+			CampaignMedium: "Tableau",
+		}
+		if remoteIP, _, err := net.SplitHostPort(r.RemoteAddr); err != nil {
+			event.IpOverride = remoteIP
+		}
+		go googleanalytics.TrackEvent(event)
+	}
+
 	tpl.ExecuteTemplate(w, "pelotonWDC.gohtml", user)
 }
 
@@ -125,7 +159,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	password = r.FormValue("password")
 
 	proto := "http"
-	if r.Host != "localhost:" + port {
+	if r.Host != "localhost:"+port {
 		proto = "https"
 	}
 	requestUrl := fmt.Sprintf("%s://%s/service/auth", proto, r.Host)
@@ -146,6 +180,36 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	req.Header.Add("Content-Type", "application/json")
 
+	if len(gaTrackingId) > 0 {
+		var userHash string
+		customerId := uuid.Must(uuid.NewV4()).String()
+		if len(username) > 0 {
+			h := sha1.New()
+			h.Write([]byte(username))
+			b := h.Sum(nil)
+			userHash = fmt.Sprintf("%x", b)
+			customerId = userHash
+		}
+		log.Printf("uid: %s", userHash)
+		event := googleanalytics.Event{
+			TrackingId:     gaTrackingId,
+			CustomerId:     customerId,
+			UserId:         userHash,
+			EventType:      "pageview",
+			DocPath:        "/login",
+			DocTitle:       "wdc login",
+			DocHost:        r.Host,
+			AppName:        appName,
+			AppVersion:     appVersion,
+			CampaignSource: "Tableau",
+			CampaignMedium: "Tableau",
+		}
+		if remoteIP, _, err := net.SplitHostPort(r.RemoteAddr); err != nil {
+			event.IpOverride = remoteIP
+		}
+		go googleanalytics.TrackEvent(event)
+	}
+
 	res, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err)
@@ -154,7 +218,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		log.Print("error: could not authenticate")
+		log.Print("could not authenticate")
 		http.Redirect(w, r, "/wdc?redirectCause=authFailed&user="+username, http.StatusFound)
 		return
 	}
@@ -202,7 +266,7 @@ func cyclingSchema(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	table, _ := vars["table"]
 	proto := "http"
-	if r.Host != "localhost:" + port {
+	if r.Host != "localhost:"+port {
 		proto = "https"
 	}
 	url := fmt.Sprintf("%s://%s/service/cycling/schema?tables=%s", proto, r.Host, table)
@@ -212,6 +276,25 @@ func cyclingSchema(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 		return
+	}
+
+	if len(gaTrackingId) > 0 {
+		event := googleanalytics.Event{
+			TrackingId:     gaTrackingId,
+			CustomerId:     uuid.Must(uuid.NewV4()).String(),
+			EventType:      "pageview",
+			DocPath:        "/cycling/schema",
+			DocTitle:       "wdc cycling schema",
+			DocHost:        r.Host,
+			AppName:        appName,
+			AppVersion:     appVersion,
+			CampaignSource: "Tableau",
+			CampaignMedium: "Tableau",
+		}
+		if remoteIP, _, err := net.SplitHostPort(r.RemoteAddr); err != nil {
+			event.IpOverride = remoteIP
+		}
+		go googleanalytics.TrackEvent(event)
 	}
 
 	res, err := client.Do(req)
@@ -245,7 +328,7 @@ func cyclingData(w http.ResponseWriter, r *http.Request) {
 		log.Print("error: the Authentication header is not a Bearer token")
 	}
 	proto := "http"
-	if r.Host != "localhost:" + port {
+	if r.Host != "localhost:"+port {
 		proto = "https"
 	}
 	url := fmt.Sprintf("%s://%s/service/cycling/data/%s", proto, r.Host, table)
@@ -256,6 +339,25 @@ func cyclingData(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 		return
+	}
+
+	if len(gaTrackingId) > 0 {
+		event := googleanalytics.Event{
+			TrackingId:     gaTrackingId,
+			CustomerId:     uuid.Must(uuid.NewV4()).String(),
+			EventType:      "pageview",
+			DocPath:        "/cycling/data",
+			DocTitle:       "wdc cycling data",
+			DocHost:        r.Host,
+			AppName:        appName,
+			AppVersion:     appVersion,
+			CampaignSource: "Tableau",
+			CampaignMedium: "Tableau",
+		}
+		if remoteIP, _, err := net.SplitHostPort(r.RemoteAddr); err != nil {
+			event.IpOverride = remoteIP
+		}
+		go googleanalytics.TrackEvent(event)
 	}
 
 	res, err := client.Do(req)
