@@ -23,21 +23,23 @@ type session struct {
 type exportedWorkouts []exportedWorkout
 
 type exportedWorkout struct {
-	StartTime         string  `csv:"Workout Timestamp"`
-	LiveOrOnDemand    string  `csv:"Live/On-Demand"`
-	Instructor        string  `csv:"Instructor Name"`
-	LengthMinutes     int     `csv:"Length (minutes)"`
-	FitnessDiscipline string  `csv:"Fitness Discipline"`
-	ClassType         string  `csv:"Type"`
-	ClassTitle        string  `csv:"Title"`
-	TotalOutput       int     `csv:"Total Output"`
-	AvgWatts          int     `csv:"Avg. Watts"`
-	AvgResistance     string  `csv:"Avg. Resistance"`
-	AvgCadenceRPM     int     `csv:"Avg. Cadence (RPM)"`
-	AvgSpeedMPH       float64 `csv:"Avg. Speed (mph)"`
-	DistanceMiles     float64 `csv:"Distance (mi)"`
-	CaloriesBurned    int     `csv:"Calories Burned"`
-	AvgHeartRate      float64 `csv:"Avg. Heartrate"`
+	StartTime          string  `csv:"Workout Timestamp"`
+	LiveOrOnDemand     string  `csv:"Live/On-Demand"`
+	Instructor         string  `csv:"Instructor Name"`
+	LengthMinutes      int     `csv:"Length (minutes)"`
+	FitnessDiscipline  string  `csv:"Fitness Discipline"`
+	ClassType          string  `csv:"Type"`
+	ClassTitle         string  `csv:"Title"`
+	TotalOutput        int     `csv:"Total Output"`
+	AvgWatts           int     `csv:"Avg. Watts"`
+	AvgResistance      string  `csv:"Avg. Resistance"`
+	AvgCadenceRPM      int     `csv:"Avg. Cadence (RPM)"`
+	AvgSpeedMPH        float64 `csv:"Avg. Speed (mph)"`
+	AvgSpeedKPH        float64 `csv:"Avg. Speed (kph)"`
+	DistanceMiles      float64 `csv:"Distance (mi)"`
+	DistanceKilometers float64 `csv:"Distance (km)"`
+	CaloriesBurned     int     `csv:"Calories Burned"`
+	AvgHeartRate       float64 `csv:"Avg. Heartrate"`
 }
 
 // List of workouts returned from /api/user/{userId}/workouts
