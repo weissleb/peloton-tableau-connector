@@ -51,6 +51,9 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 
 	layout := "2006-01-02 15:04 (MST)"
 	for _, w := range exportedWorkouts {
+		if w.FitnessDiscipline != "Cycling" {
+			continue
+		}
 		startTime, _ := time.Parse(layout, w.StartTime)
 		timeZone, _ := startTime.Zone()
 		avgResistenceInt, _ := strconv.Atoi(strings.TrimRight(w.AvgResistance, "%s"))
