@@ -24,27 +24,29 @@ type Workouts []Workout
 type Workout struct {
 	ExtractTimeUTC time.Time `csv:"ExtractTimeUTC"`
 	//Id             string    `csv:"Id"`
-	StartTime      time.Time `csv:"StartTime"`
-	TimeZone       string    `csv:"TimeZone"`
-	StartTimeUTC   time.Time `csv:"StartTimeUTC"`
-	WasPR          bool      `csv:"WasPR"`
-	CurrentPR      bool      `csv:"CurrentPR"`
-	Type           string    `csv:"Type"`
-	RideTitle      string    `csv:"RideTitle"`
+	StartTime    time.Time `csv:"StartTime"`
+	TimeZone     string    `csv:"TimeZone"`
+	StartTimeUTC time.Time `csv:"StartTimeUTC"`
+	WasPR        bool      `csv:"WasPR"`
+	CurrentPR    bool      `csv:"CurrentPR"`
+	Type         string    `csv:"Type"`
+	RideTitle    string    `csv:"RideTitle"`
 	//RideDifficulty     float32   `csv:"RideDifficulty"`
 	//RideLevel          string    `csv:"RideLevel"`
 	Instructor string `csv:"Instructor"`
 	//InstructorImageURL string    `csv:"InstructorImageURL"`
 	RideLengthMinutes int `csv:"RideLengthMinutes"`
 	//HasWeights         bool      `csv:"HasWeights"`
-	Output         int     `csv:"Output"`
-	AvgWatts       int     `csv:"AvgWatts"`
-	AvgResistance  float64 `csv:"AvgResistance"`
-	AvgCadenceRPM  int     `csv:"AvgCadence"`
-	AvgSpeedMPH    float64 `csv:"AvgSpeedMPH"`
-	DistanceMiles  float64 `csv:"DistanceMiles"`
-	CaloriesBurned int     `csv:"CaloriesBurned"`
-	AvgHeartRate   float64 `csv:"AvgHeartRate"`
+	Output             int     `csv:"Output"`
+	AvgWatts           int     `csv:"AvgWatts"`
+	AvgResistance      float64 `csv:"AvgResistance"`
+	AvgCadenceRPM      int     `csv:"AvgCadence"`
+	AvgSpeedMPH        float64 `csv:"AvgSpeedMPH"`
+	AvgSpeedKPH        float64 `csv:"AvgSpeedKPH"`
+	DistanceMiles      float64 `csv:"DistanceMiles"`
+	DistanceKilometers float64 `csv:"DistanceKilometers"`
+	CaloriesBurned     int     `csv:"CaloriesBurned"`
+	AvgHeartRate       float64 `csv:"AvgHeartRate"`
 }
 
 func (w Workouts) GetAsRecords(withHeader bool) [][]string {
@@ -81,7 +83,9 @@ func (w Workouts) GetAsRecords(withHeader bool) [][]string {
 			fmt.Sprintf("%.2f", workout.AvgResistance),
 			fmt.Sprintf("%d", workout.AvgCadenceRPM),
 			fmt.Sprintf("%.2f", workout.AvgSpeedMPH),
+			fmt.Sprintf("%.2f", workout.AvgSpeedKPH),
 			fmt.Sprintf("%.2f", workout.DistanceMiles),
+			fmt.Sprintf("%.2f", workout.DistanceKilometers),
 			fmt.Sprintf("%d", workout.CaloriesBurned),
 			fmt.Sprintf("%.2f", workout.AvgHeartRate),
 		})
