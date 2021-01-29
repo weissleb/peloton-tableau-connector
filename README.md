@@ -35,8 +35,10 @@ Therefore, there's only one table right now, called `Workouts`.  It provides one
 |Avg Watts|Integer|The average output in watts.|
 |Avg Resistence|Float|The average resistance as a percentage.|
 |Avg Cadence RPM|Integer|The average cadence in rpm.|
-|Avg Speed MPH|Float|The average speed in mph.|
-|Distance Miles|Float|The total distance traveled in miles.|
+|Avg Speed MPH|Float|The average speed in mph.  This will be 0 if your Peloton display preferences are Kilometers.|
+|Avg Speed KPH|Float|The average speed in kph.  This will be 0 if your Peloton display preferences are Miles.|
+|Distance Miles|Float|The total distance traveled in miles.  This will be 0 if your Peloton display preferences are Kilometers.|
+|Distance Kilometers|Float|The total distance traveled in kilometers.  This will be 0 if your Peloton display preferences are Miles.|
 |Calories Burned|Integer|The total calories burned in kcal.|
 |Avg Heart Rate|Float|The average heart rate in bpm.|
 
