@@ -106,7 +106,7 @@ Extract your data.
 
 ![get data](doc-images/get-data.png)
 
-Build useful and beautiful reports and dashboards.
+Build useful and beautiful reports and dashboards.  This one can be found on [Tableau Public here](https://public.tableau.com/profile/brian.weissler#!/vizhome/PelotonPRs/PRsoverTime).
 
 ![dashboard](doc-images/dashboard.png)
 
