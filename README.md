@@ -8,7 +8,7 @@ This is a [Tableau Web Data Connector](https://tableau.github.io/webdataconnecto
 It's early days for this connector, but I hope, given good feedback, it will progress quickly.  This also means you may encounter bugs, or breaking schema changes.
 
 ## Availability
-Currently (as of Jan 18, 2021), this is publicly available online in an alpha release, but may be unstable.  You can visit the home page [here](https://warm-shore-62344.herokuapp.com/home).
+Currently (as of Jan 18, 2021), this is publicly available online in an alpha release, but may be unstable.  You can visit the home page [here](https://www.mypelotondata.com).
 
 After receiving feedback and doing a little more testing, my intent is submit this as a [Community Connector](https://tableau.github.io/webdataconnector/community/). 
 
@@ -94,21 +94,13 @@ _If necessary, allow connections._
 ## Connect with Tableau Desktop
 Install [Tableau Desktop](https://public.tableau.com/en-us/s/download), if you haven't already.
 
-Open Tableau, and use the Web Data Connector option.  If you're running this locally, enter `http://localhost:<port>/wdc` (e.g `http://localhost:8889/wdc`).  If you're connecting to the online version (currently in alpha, and likely unstable), enter `https://warm-shore-62344.herokuapp.com/wdc`.
-
-![connect](doc-images/connect.png)
+Open Tableau, and use the Web Data Connector option.  If you're running this locally, enter `http://localhost:<port>/wdc` (e.g `http://localhost:8889/wdc`).  If you're connecting to the online version (currently in alpha, and likely unstable), enter `https://www.mypelotondata.com/wdc`.
 
 Enter your Peloton credentials.
 
-![login](doc-images/login.png)
-
-Extract your data.
-
-![get data](doc-images/get-data.png)
+Extract your data by clicking Get Cycling Data link.
 
 Build useful and beautiful reports and dashboards.  This one can be found on [Tableau Public here](https://public.tableau.com/profile/brian.weissler#!/vizhome/PelotonPRs/PRsoverTime).
-
-![dashboard](doc-images/dashboard.png)
 
 ## Shutdown
 As noted above, the connector is stateless.  Once you're done, and you've saved your Tableau workbook, feel free to shut it down.  A simple `ctrl+c` in the terminal will do the trick.
