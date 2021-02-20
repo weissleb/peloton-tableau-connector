@@ -73,6 +73,7 @@ type ride struct {
 	} `json:"instructor"`
 	Difficulty_Rating float64 `json:"difficulty_rating_avg"`
 	Difficulty_Level  string  `json:"difficulty_level"`
+	ImageURL          string  `json:"image_url"`
 	Equipmenttags     []struct {
 		Slug string `json:"slug"`
 	} `json:"equipment_tags"`
