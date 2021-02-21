@@ -22,6 +22,7 @@ Therefore, there's only one table right now, called `Workouts`.  It provides one
 |Field Alias|Data Type|Description|
 |--- |--- |--- |
 |Extract Time UTC|Datetime|The time in UTC that the data were extracted from Peloton.|
+|Id|String|A unique identifier for the workout, assigned by Peloton.|
 |Start Time|Datetime|The local time you started the class.|
 |Time Zone|String|The time zone you were in when you took the class.|
 |Start Time UTC|Datetime|The time in UTC you started the class.|
@@ -29,7 +30,9 @@ Therefore, there's only one table right now, called `Workouts`.  It provides one
 |Current PR|Boolean|Indicates whether or not this workout is your current personal record for the ride length|
 |Type|String|The type of ride such as Beginner, Climb, Live DJ, Intervals, Music, etc.|
 |Ride Title|String|The descriptive title of the ride.|
+|Ride Difficulty|Float|The average difficulty rating of the ride.|
 |Instructor|String|The name of the ride instructor.|
+|Ride Image Url|String|The URL to the image shown depicting the ride.|
 |Ride Length Minutes|Integer|The length in minutes the ride was scheduled for.|
 |Output|Integer|The total output in kj.|
 |Avg Watts|Integer|The average output in watts.|
