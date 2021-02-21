@@ -224,7 +224,9 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 		}
 	}
 
-	log.Printf("DEBUG: total workouts = %d, api workouts in map = %d", workouts.Len(), len(apiWorkoutsMap))
+	if config.LogLevel == "DEBUG" {
+		log.Printf("DEBUG: total workouts = %d, api workouts in map = %d", workouts.Len(), len(apiWorkoutsMap))
+	}
 	return workouts, nil
 }
 
