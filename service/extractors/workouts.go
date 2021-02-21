@@ -8,6 +8,8 @@ import (
 	"github.com/weissleb/peloton-tableau-connector/service/peloservice"
 	"strings"
 	"strconv"
+	"fmt"
+	"math"
 )
 
 var layout = "2006-01-02 15:04:05"
@@ -29,7 +31,9 @@ func init() {
 // Gets dataset from the peloservice and transforms it for our needs.
 func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 
+	workouts := Workouts{}
 	user := client.GetSessionUser()
+
 	if workouts, ok := workoutsCache[user]; ok {
 		if time.Now().Before(workouts.expire) {
 			log.Print("returning non-expired workouts cache hit for user " + user)
@@ -39,89 +43,46 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 		delete(workoutsCache, user)
 	}
 
-	workouts := Workouts{}
-	extractTime := time.Now().UTC()
-	exportedWorkouts, err := peloservice.GetExportedWorkouts(*client.getHttpClient(), *client.getUserSession())
-	if err != nil {
-		return workouts, err
+	type extraFields struct {
+		Id             string
+		RideDifficulty float64
+		RideImageUrl   string
+		StartTime      time.Time
+		TimeZone       string
 	}
-	if len(exportedWorkouts) == 0 {
-		return nil, nil
-	}
+	apiWorkoutsMap := make(map[string]extraFields)
 
+	// Go get the workouts from the API.
+	page := uint16(0)
+	hasNext := true
 	layout := "2006-01-02 15:04 (MST)"
-	for _, w := range exportedWorkouts {
-		if w.FitnessDiscipline != "Cycling" {
-			continue
+
+	// The underlying Peloton API which is called by `peloservice.GetWorkouts` returns results with paging, so we
+	// also will query workouts in pages.
+	for ; hasNext; page++ {
+		// TODO: Let's add a retry loop.
+		apiWorkouts, err := peloservice.GetWorkouts(*client.getHttpClient(), *client.getUserSession(), page)
+		if err != nil {
+			return workouts, err
 		}
-		startTime, _ := time.Parse(layout, w.StartTime)
-		timeZone, _ := startTime.Zone()
-		avgResistenceInt, _ := strconv.Atoi(strings.TrimRight(w.AvgResistance, "%s"))
-		avgResistence := float64(avgResistenceInt) / 100.00
-		workouts = append(workouts, Workout{
-			ExtractTimeUTC:     extractTime,
-			StartTime:          startTime,
-			TimeZone:           timeZone,
-			StartTimeUTC:       startTime.UTC(),
-			Type:               w.ClassType,
-			RideTitle:          w.ClassTitle,
-			Instructor:         w.Instructor,
-			RideLengthMinutes:  w.LengthMinutes,
-			Output:             w.TotalOutput,
-			AvgWatts:           w.AvgWatts,
-			AvgResistance:      avgResistence,
-			AvgCadenceRPM:      w.AvgCadenceRPM,
-			AvgSpeedMPH:        w.AvgSpeedMPH,
-			AvgSpeedKPH:        w.AvgSpeedKPH,
-			DistanceMiles:      w.DistanceMiles,
-			DistanceKilometers: w.DistanceKilometers,
-			CaloriesBurned:     w.CaloriesBurned,
-			AvgHeartRate:       w.AvgHeartRate,
-		})
-	}
+		if config.LogLevel == "DEBUG" {
+			log.Printf("DEBUG: got workouts for page %v of %v", page, apiWorkouts.PageCount-1)
+		}
+		hasNext = apiWorkouts.HasNext
+		// We can set this config to false if we want to test by only getting a single page.
+		// Working through all the pages could be a little slow because of subsequent peloservice for ride data.
+		if !config.PeloAllPages {
+			log.Print("only getting first page")
+			hasNext = false
+		}
 
-	/*
-		 * This section pulls the workouts from the API, rather than using the CSV export.
-		 * I may add some of this back later to assign the Id, RideDifficulty, RideLevel, InstructorImageURL,
-		 * and HasWeights fields.
+		if len(apiWorkouts.Workouts) == 0 {
+			return nil, nil
+		}
 
-		page := uint16(0)
-		hasNext := true
-
-		// The underlying Peloton API which is called by `peloservice.GetWorkouts` returns results with paging, so we
-		// also will query workouts in pages.
-		for ; hasNext; page++ {
-			// Let's add a retry loop.
-			exportedWorkouts, err := peloservice.GetWorkouts(*client.getHttpClient(), *client.getUserSession(), page)
-			if err != nil {
-				return workouts, err
-			}
-			if config.LogLevel == "DEBUG" {
-				log.Printf("DEBUG: got workouts for page %v of %v", page, exportedWorkouts.PageCount-1)
-			}
-			hasNext = exportedWorkouts.HasNext
-			// We can set this config to false if we want to test by only getting a single page.
-			// Working through all the pages could be a little slow because of subsequent peloservice for ride data.
-			if !config.PeloAllPages {
-				log.Print("only getting first page")
-				hasNext = false
-			}
-
-			if len(exportedWorkouts.Workouts) == 0 {
-				return nil, nil
-			}
-
-			for _, w := range exportedWorkouts.Workouts {
-				if w.Wtype != "cycling" {
-					continue
-				}
-				// Gather up workouts so we can later assign Id, RideDifficulty, RideLevel,
-				// InstructorImageURL and then HasWeights.
-			}
-
-			// The following is really only necessary to get the HasWeights flag.
-			// It gets instructor URL too, but meh.
-
+		// The following is really only necessary to get the HasWeights flag.
+		// It gets instructor URL too, but meh.
+		/*
 			var waitGroup sync.WaitGroup
 			for i, _ := range workouts {
 				waitGroup.Add(1)
@@ -140,7 +101,7 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 					if config.LogLevel == "DEBUG" {
 						log.Printf("instructor is %s", ride.Instructor.Name)
 					}
-					workouts[i].InstructorImageURL = ride.Instructor.ImageURL
+					workouts[i].RideImageUrl = ride.Instructor.ImageURL
 					// set HasWeights
 					for _, equipmenttag := range ride.Equipmenttags {
 						if strings.Contains(equipmenttag.Slug, "weights") {
@@ -151,8 +112,75 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 			}
 
 			waitGroup.Wait()
+		*/
+
+		dayLayout := "2006-01-02"
+		for _, workout := range apiWorkouts.Workouts {
+			loc, _ := time.LoadLocation(workout.Timezone)
+			st := time.Unix(int64(workout.StartTimeSeconds), 0).In(loc)
+			z, _ := st.Zone()
+			key := fmt.Sprintf("%s %.0f %s",
+				st.Format(dayLayout), math.Round(workout.Output/1000), strings.ToLower(workout.Ride.Title))
+			apiWorkoutsMap[key] = extraFields{
+				Id:             workout.Id,
+				RideDifficulty: workout.Ride.Difficulty_Rating,
+				RideImageUrl:   workout.Ride.ImageURL,
+				StartTime:      st,
+				TimeZone:       z,
+			}
 		}
-	*/
+	}
+
+	extractTime := time.Now().UTC()
+	exportedWorkouts, err := peloservice.GetExportedWorkouts(*client.getHttpClient(), *client.getUserSession())
+	if err != nil {
+		return workouts, err
+	}
+	if len(exportedWorkouts) == 0 {
+		return nil, nil
+	}
+
+	for _, w := range exportedWorkouts {
+		if w.FitnessDiscipline != "Cycling" {
+			continue
+		}
+		startTime, _ := time.Parse(layout, w.StartTime)
+		timeZone, _ := startTime.Zone()
+		avgResistenceInt, _ := strconv.Atoi(strings.TrimRight(w.AvgResistance, "%s"))
+		avgResistence := float64(avgResistenceInt) / 100.00
+		key := fmt.Sprintf("%s %d %s",
+			w.StartTime[:10], w.TotalOutput, strings.ToLower(w.ClassTitle))
+		extras, ok := apiWorkoutsMap[key]
+		if !ok {
+			log.Printf("warning, did not find api workouts for %s on at %s", w.ClassTitle, w.StartTime)
+		} else {
+			startTime = extras.StartTime
+			timeZone = extras.TimeZone
+		}
+		workouts = append(workouts, Workout{
+			Id:                 extras.Id,
+			ExtractTimeUTC:     extractTime,
+			StartTime:          startTime,
+			TimeZone:           timeZone,
+			StartTimeUTC:       startTime.UTC(),
+			Type:               w.ClassType,
+			RideTitle:          w.ClassTitle,
+			Instructor:         w.Instructor,
+			RideLengthMinutes:  w.LengthMinutes,
+			RideDifficulty:     extras.RideDifficulty,
+			RideImageUrl:       extras.RideImageUrl,
+			Output:             w.TotalOutput,
+			AvgWatts:           w.AvgWatts,
+			AvgResistance:      avgResistence,
+			AvgCadenceRPM:      w.AvgCadenceRPM,
+			AvgSpeedMPH:        w.AvgSpeedMPH,
+			AvgSpeedKPH:        w.AvgSpeedKPH,
+			DistanceMiles:      w.DistanceMiles,
+			DistanceKilometers: w.DistanceKilometers,
+			CaloriesBurned:     w.CaloriesBurned,
+			AvgHeartRate:       w.AvgHeartRate,
+		})
+	}
 
 	// sort the workouts by StartTime
 	// iterate the workouts and set WasPR
@@ -196,6 +224,9 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 		}
 	}
 
+	if config.LogLevel == "DEBUG" {
+		log.Printf("DEBUG: total workouts = %d, api workouts in map = %d", workouts.Len(), len(apiWorkoutsMap))
+	}
 	return workouts, nil
 }
 

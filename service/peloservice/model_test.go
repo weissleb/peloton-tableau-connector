@@ -16,7 +16,24 @@ func TestJson(t *testing.T) {
       "start_time": 1599492654,
       "status": "COMPLETE",
       "workout_type": "cycling",
-      "total_work": 482432.95
+      "total_work": 482432.95,
+      "ride": {
+		"has_closed_captions": false,
+		"content_provider": "peloton",
+		"content_format": "video",
+		"description": "Push through heart-pumping intervals mixed with power-building hills. Improve your power and your overall fitness in this high-intensity ride.",
+		"difficulty_rating_avg": 8.8996,
+		"difficulty_rating_count": 16182,
+		"difficulty_level": null,
+		"duration": 1800,
+		"extra_images": [],
+		"fitness_discipline": "cycling",
+		"fitness_discipline_display_name": "Cycling",
+		"has_pedaling_metrics": true,
+		"id": "044b3cbe99d24651bf0886483c223c7f",
+		"image_url": "https://s3.amazonaws.com/peloton-ride-images/62a16036491baca21fad064b6d290a396061049f/img_1613388829_53620bf581924f4fadc53096be4f8b5d.png",
+		"instructor_id": "05735e106f0747d2a112d32678be8afd"
+      }
     }
   ]
 }`)
@@ -56,6 +73,12 @@ func TestJson(t *testing.T) {
 	got = rideDetail.Ride.Equipmenttags[0].Slug
 	if got != want {
 		t.Fatalf("got: %s; want %s\n", got, want)
+	}
+
+	want = 8.8996
+	got = workouts.Workouts[0].Ride.Difficulty_Rating
+	if got != want {
+		t.Fatalf("got: %f; want %f\n", got, want)
 	}
 }
 

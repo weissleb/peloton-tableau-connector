@@ -22,20 +22,19 @@ type WorkoutsSummary struct {
 type Workouts []Workout
 
 type Workout struct {
-	ExtractTimeUTC time.Time `csv:"ExtractTimeUTC"`
-	//Id             string    `csv:"Id"`
-	StartTime    time.Time `csv:"StartTime"`
-	TimeZone     string    `csv:"TimeZone"`
-	StartTimeUTC time.Time `csv:"StartTimeUTC"`
-	WasPR        bool      `csv:"WasPR"`
-	CurrentPR    bool      `csv:"CurrentPR"`
-	Type         string    `csv:"Type"`
-	RideTitle    string    `csv:"RideTitle"`
-	//RideDifficulty     float32   `csv:"RideDifficulty"`
-	//RideLevel          string    `csv:"RideLevel"`
-	Instructor string `csv:"Instructor"`
-	//InstructorImageURL string    `csv:"InstructorImageURL"`
-	RideLengthMinutes int `csv:"RideLengthMinutes"`
+	ExtractTimeUTC     time.Time `csv:"ExtractTimeUTC"`
+	Id                string    `csv:"Id"`
+	StartTime         time.Time `csv:"StartTime"`
+	TimeZone          string    `csv:"TimeZone"`
+	StartTimeUTC      time.Time `csv:"StartTimeUTC"`
+	WasPR             bool      `csv:"WasPR"`
+	CurrentPR         bool      `csv:"CurrentPR"`
+	Type              string    `csv:"Type"`
+	RideTitle         string    `csv:"RideTitle"`
+	RideDifficulty    float64   `csv:"RideDifficulty"`
+	Instructor        string    `csv:"Instructor"`
+	RideImageUrl      string    `csv:"RideImageUrl"`
+	RideLengthMinutes int       `csv:"RideLengthMinutes"`
 	//HasWeights         bool      `csv:"HasWeights"`
 	Output             int     `csv:"Output"`
 	AvgWatts           int     `csv:"AvgWatts"`
@@ -64,7 +63,7 @@ func (w Workouts) GetAsRecords(withHeader bool) [][]string {
 	for _, workout := range w {
 		records = append(records, []string{
 			workout.ExtractTimeUTC.Format(layout),
-			//workout.Id,
+			workout.Id,
 			workout.StartTime.Format(layout),
 			workout.TimeZone,
 			workout.StartTimeUTC.Format(layout),
@@ -72,10 +71,9 @@ func (w Workouts) GetAsRecords(withHeader bool) [][]string {
 			fmt.Sprintf("%d", boolToDig(workout.CurrentPR)),
 			workout.Type,
 			workout.RideTitle,
-			//fmt.Sprintf("%f", workout.RideDifficulty),
-			//workout.RideLevel,
+			fmt.Sprintf("%.2f", workout.RideDifficulty),
 			workout.Instructor,
-			//workout.InstructorImageURL,
+			workout.RideImageUrl,
 			fmt.Sprintf("%d", workout.RideLengthMinutes),
 			//fmt.Sprintf("%d", boolToDig(workout.HasWeights)),
 			fmt.Sprintf("%d", workout.Output),
