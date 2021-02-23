@@ -16,7 +16,7 @@ var Banner = `
 /_/    \___/_/\____/\__/\____/_/ /_/ 
 `
 
-var PeloPageLimit = 100
+var PeloPageLimit = 500
 var PeloAllPages = true
 
 var OutputFileName = "data_" + time.Now().UTC().Format("20060102150405") + ".csv"
