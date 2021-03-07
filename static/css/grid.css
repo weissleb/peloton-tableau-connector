@@ -1,0 +1,97 @@
+.container {
+    display: grid;
+    grid-template-columns: [left-gutter] 1fr [all-content] 75% [right-gutter] 1fr ;
+    grid-template-rows: [hero] 100px [sub-hero] 35px [main] auto;
+    font-family: 'Pelotare Sans', sans-serif;
+}
+
+.hero {
+    display: grid;
+    grid-template-columns: [hero-left] 60% [hero-right] 1fr;
+    grid-column: all-content;
+    grid-row: hero;
+    background-color: #222529;
+    color: white;
+}
+
+.hero-left {
+    grid-column: hero-left;
+    justify-self: left;
+    padding: 0 10px;
+}
+
+.hero-right {
+    grid-column: here-right;
+    justify-self: end;
+    padding: 15px 10px 0;
+}
+
+.sub-hero {
+    display: grid;
+    grid-template-columns: [sub-hero-left] 70% [menu-home] 1fr [menu-tableau] 1fr [menu-examples] 1fr [menu-contact] 1fr;
+    grid-column: all-content;
+    grid-row: sub-hero;
+    background-color: #222529;
+    color: white;
+}
+
+.sub-hero-left {
+    grid-column: sub-hero-left;
+    align-self: end;
+    padding: 10px 10px;
+}
+
+.menu-home {
+    grid-column: menu-home;
+    align-self: end;
+    justify-self: stretch;
+    padding: 10px;
+}
+
+.menu-home:hover {
+    background-color: #ffe28c;
+    color: #222529;
+}
+
+.menu-tableau {
+    grid-column: menu-tableau;
+    align-self: end;
+    justify-self: stretch;
+    padding: 10px;
+}
+
+.menu-tableau:hover {
+    background-color: #ffe28c;
+    color: #222529;
+}
+
+.menu-examples {
+    grid-column: menu-examples;
+    align-self: end;
+    justify-self: stretch;
+    padding: 10px;
+}
+
+.menu-examples:hover {
+    background-color: #ffe28c;
+    color: #222529;
+}
+
+.menu-contact {
+    grid-column: menu-contact;
+    align-self: end;
+    justify-self: stretch;
+    padding: 10px;
+}
+
+.menu-contact:hover {
+    background-color: #ffe28c;
+    color: #222529;
+}
+
+.main {
+    grid-column: all-content;
+    grid-row: main;
+    background-color: #e4e7eb;
+    padding: 0 10px;
+}
