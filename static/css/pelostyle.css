@@ -1,44 +1,271 @@
-/* pelostyle.css */
 .container {
-    width: 75%;
-    margin: 0 auto;
-    font-family: 'Pelotare Sans', sans-serif;
-    font-size: 14px;
-    color: #202020;
+    display: grid;
+    grid-template-columns: [left-gutter] 1fr [all-content] 80% [right-gutter] 1fr ;
+    grid-template-rows: [logo] auto [spacer] 25px [hero] auto [sub-hero] auto [main] auto [tableau] auto [examples] auto [data] auto;
+    font-family: "Benton Sans Book", Helvetica, sans-serif;
 }
 
-.notice {
-    margin: 10px auto;
-    padding: 5px 20px;
-    border-radius: 2px;
-    font-family: 'Pelotare Sans', sans-serif;
-    font-size: 14px;
-    color: #202020;
-    background-color: #e4e7eb;
+.logo-left {
+    grid-column: left-gutter;
+    grid-row: logo;
+    background-color: #222529;
 }
 
-h1, h2, h3, h4 {
-    color: #222529;
+.logo-right {
+    grid-column: right-gutter;
+    grid-row: logo;
+    background-color: #222529;
 }
 
-a {
-    color: #5a6474;
-    font-weight: bold;
+.logo {
+    grid-column: all-content;
+    grid-row: logo;
+    background-color: #222529;
+    padding: 10px 0;
 }
 
-table, th, td {
-    border: 1px solid #5a6474;
-    border-collapse: collapse;
+.spacer {
+    grid-column: all-content;
+    grid-row: spacer;
+    background-color: white;
 }
 
-th {
-    text-align: left;
+.spacer2 {
+    grid-column: all-content;
+    grid-row: spacer2;
+    background-color: white;
 }
 
-th, td {
+.hero-left {
+    grid-column: left-gutter;
+    grid-row: hero;
+    background-color: #222529;
+}
+
+.hero-right {
+    grid-column: right-gutter;
+    grid-row: hero;
+    background-color: #222529;
+}
+
+.hero {
+    grid-column: all-content;
+    grid-row: hero;
+    background-color: #222529;
+    color: white;
+    padding: 0 15px 15px;
+}
+
+.sub-hero-left {
+    grid-column: left-gutter;
+    grid-row: sub-hero;
+    background-color: #222529;
+}
+
+.sub-hero-right {
+    grid-column: right-gutter;
+    grid-row: sub-hero;
+    background-color: #222529;
+}
+
+.sub-hero {
+    display: grid;
+    grid-template-columns: [menu-home] 1fr [menu-tableau] 1fr [menu-examples] 1fr [menu-data] 1fr [menu-contact] 1fr;
+    grid-column: all-content;
+    grid-row: sub-hero;
+    background-color: #222529;
+    color: white;
+}
+
+.menu-home {
+    grid-column: menu-home;
+    align-self: end;
+    justify-self: stretch;
     padding: 10px;
 }
 
-ol {
+.sub-hero a {
+    text-decoration: none;
+    color: white;
+}
+
+.menu-home:hover {
+    background-color: #ffe28c;
+}
+
+.menu-home a:hover {
+    color: #222529;
+}
+
+.menu-tableau {
+    grid-column: menu-tableau;
+    align-self: end;
+    justify-self: stretch;
+    padding: 10px;
+}
+
+.menu-tableau:hover {
+    background-color: #ffe28c;
+}
+
+.menu-tableau a:hover {
+    color: #222529;
+}
+
+.menu-examples {
+    grid-column: menu-examples;
+    align-self: end;
+    justify-self: stretch;
+    padding: 10px;
+}
+
+.menu-examples:hover {
+    background-color: #ffe28c;
+    color: #222529;
+}
+
+.menu-examples a:hover {
+    color: #222529;
+}
+
+.menu-data {
+    grid-column: menu-data;
+    align-self: end;
+    justify-self: stretch;
+    padding: 10px;
+}
+
+.menu-data:hover {
+    background-color: #ffe28c;
+    color: #222529;
+}
+
+.menu-data a:hover {
+    color: #222529;
+}
+
+.menu-contact {
+    grid-column: menu-contact;
+    align-self: end;
+    justify-self: stretch;
+    padding: 10px;
+}
+
+.menu-contact:hover {
+    background-color: #ffe28c;
+    color: #222529;
+}
+
+.menu-contact a:hover {
+    color: #222529;
+}
+
+.main {
+    grid-column: all-content;
+    grid-row: main;
+    padding: 20px 10px;
+    color: #222529;
+    line-height: 30px;
+}
+
+.main a {
+    text-decoration: none;
+    font-weight: bold;
+    color: #222529;
+}
+
+.tableau-left {
+    grid-column: left-gutter;
+    grid-row: tableau;
+    background-color: #e4e7eb;
+}
+
+.tableau-right {
+    grid-column: right-gutter;
+    grid-row: tableau;
+    background-color: #e4e7eb;
+}
+
+.tableau {
+    grid-column: all-content;
+    grid-row: tableau;
+    background-color: #e4e7eb;
+    padding: 0 10px 20px;
+    line-height: 30px;
+}
+
+.tableau a {
+    text-decoration: none;
+    font-weight: bold;
+    color: #222529;
+}
+
+.examples {
+    grid-column: all-content;
+    grid-row: examples;
+    padding: 20px 10px;
+    line-height: 30px;
+}
+
+.examples a {
+    text-decoration: none;
+    font-weight: bold;
+    color: #222529;
+}
+
+.data-left {
+    grid-column: left-gutter;
+    grid-row: data;
+    background-color: #e4e7eb;
+}
+
+.data-right {
+    grid-column: right-gutter;
+    grid-row: data;
+    background-color: #e4e7eb;
+}
+
+.data {
+    grid-column: all-content;
+    grid-row: data;
+    background-color: #e4e7eb;
+    padding: 0 10px 20px;
+    line-height: 30px;
+}
+
+.data table {
+    width: 100%;
+    border: 1px solid #5a6474;
+    border-collapse: collapse;
+    background-color: white;
+}
+
+.data tr:nth-child(even) {
+    background-color: #e4e7eb;
+}
+
+.data th {
+    text-align: left;
+}
+
+.data th, td {
+    padding: 10px 20px;
+}
+
+.data ol {
     line-height: 25px;
+}
+
+.contact {
+    grid-column: all-content;
+    grid-row: contact;
+    padding: 20px 10px;
+    color: #222529;
+    line-height: 30px;
+}
+
+.contact a {
+    text-decoration: none;
+    font-weight: bold;
+    color: #222529;
 }
