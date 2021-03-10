@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"fmt"
 	"math"
+	"regexp"
 )
 
 var layout = "2006-01-02 15:04:05"
@@ -50,7 +51,8 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 		StartTime      time.Time
 		TimeZone       string
 	}
-	apiWorkoutsMap := make(map[string]extraFields)
+	apiWorkoutsMapAbbreviation := make(map[string]extraFields) // Old data come using abbreviation and no daylight savings :-(
+	apiWorkoutsMapOffset := make(map[string]extraFields) // Newer data come using offset.
 
 	// Go get the workouts from the API.
 	page := uint16(0)
@@ -115,13 +117,26 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 		*/
 
 		dayLayout := "2006-01-02"
+		minuteLayout := "2006-01-02 15:04"
 		for _, workout := range apiWorkouts.Workouts {
 			loc, _ := time.LoadLocation(workout.Timezone)
 			st := time.Unix(int64(workout.StartTimeSeconds), 0).In(loc)
 			z, _ := st.Zone()
+			// Store keys as day, output, title for matching start time provided with abbreviation and no daylight savings.
 			key := fmt.Sprintf("%s %.0f %s",
 				st.Format(dayLayout), math.Round(workout.Output/1000), strings.ToLower(workout.Ride.Title))
-			apiWorkoutsMap[key] = extraFields{
+			apiWorkoutsMapAbbreviation[key] = extraFields{
+				Id:             workout.Id,
+				RideDifficulty: workout.Ride.Difficulty_Rating,
+				RideImageUrl:   workout.Ride.ImageURL,
+				StartTime:      st,
+				TimeZone:       z,
+			}
+
+			// Store keys as minute, title for matching starting properly provided with offset.
+			key = fmt.Sprintf("%s %s",
+				st.Format(minuteLayout), strings.ToLower(workout.Ride.Title))
+			apiWorkoutsMapOffset[key] = extraFields{
 				Id:             workout.Id,
 				RideDifficulty: workout.Ride.Difficulty_Rating,
 				RideImageUrl:   workout.Ride.ImageURL,
@@ -140,6 +155,14 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 		return nil, nil
 	}
 
+	pAbbreviation := "\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}\\s[(]\\w+[)]"
+	rAbbreviation := regexp.MustCompile(pAbbreviation)
+
+	pOffset := "\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}\\s[(].?\\d+[)]"
+	rOffset := regexp.MustCompile(pOffset)
+
+	var extras extraFields
+	var foundExtras bool
 	for _, w := range exportedWorkouts {
 		if w.FitnessDiscipline != "Cycling" {
 			continue
@@ -148,10 +171,18 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 		timeZone, _ := startTime.Zone()
 		avgResistenceInt, _ := strconv.Atoi(strings.TrimRight(w.AvgResistance, "%s"))
 		avgResistence := float64(avgResistenceInt) / 100.00
-		key := fmt.Sprintf("%s %d %s",
-			w.StartTime[:10], w.TotalOutput, strings.ToLower(w.ClassTitle))
-		extras, ok := apiWorkoutsMap[key]
-		if !ok {
+
+		if rAbbreviation.MatchString(w.StartTime) {
+			key := fmt.Sprintf("%s %d %s",
+				w.StartTime[:10], w.TotalOutput, strings.ToLower(w.ClassTitle))
+			extras, foundExtras = apiWorkoutsMapAbbreviation[key]
+		} else if rOffset.MatchString(w.StartTime) {
+			key := fmt.Sprintf("%s %s",
+				w.StartTime[:16], strings.ToLower(w.ClassTitle))
+			extras, foundExtras = apiWorkoutsMapOffset[key]
+		}
+
+		if !foundExtras {
 			log.Printf("warning, did not find api workouts for %s on at %s", w.ClassTitle, w.StartTime)
 		} else {
 			startTime = extras.StartTime
@@ -225,7 +256,7 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 	}
 
 	if config.LogLevel == "DEBUG" {
-		log.Printf("DEBUG: total workouts = %d, api workouts in map = %d", workouts.Len(), len(apiWorkoutsMap))
+		log.Printf("DEBUG: total workouts = %d, api workouts in map = %d", workouts.Len(), len(apiWorkoutsMapAbbreviation))
 	}
 	return workouts, nil
 }
