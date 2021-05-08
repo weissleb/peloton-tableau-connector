@@ -66,10 +66,10 @@ git clone https://github.com/weissleb/peloton-tableau-connector.git && cd peloto
 
 > This is a one-time task, unless you want to pull any updates using `git pull` from inside the repo's directory.
 
-Build the executable.
+Download the dependencies and build the executable.
 
 ```shell script
-go build -o wdc github.com/weissleb/peloton-tableau-connector
+go mod download && go build -o wdc github.com/weissleb/peloton-tableau-connector
 ```
 
 > This is a one-time task, unless you'll pulled any updates from the repo using `git pull`, and would like to build the connector with those changes.
