@@ -30,7 +30,7 @@ func GetExportedWorkouts(client clients.HttpClientInterface, session UserSession
 	}
 	req.Header.Add("Cookie", fmt.Sprintf(session.Cookies))
 
-	res, err = client.Do(req)
+	res, _ = client.Do(req)
 	defer res.Body.Close()
 	body, err = ioutil.ReadAll(res.Body)
 
@@ -70,7 +70,7 @@ func GetWorkouts(client clients.HttpClientInterface, session UserSession, page u
 	q.Add("joins", "ride")
 	req.URL.RawQuery = q.Encode()
 
-	res, err = client.Do(req)
+	res, _ = client.Do(req)
 	defer res.Body.Close()
 	body, err = ioutil.ReadAll(res.Body)
 
@@ -102,7 +102,7 @@ func GetRide(client clients.HttpClientInterface, session UserSession, id string)
 	}
 	req.Header.Add("Cookie", fmt.Sprintf(session.Cookies))
 
-	res, err = client.Do(req)
+	res, _ = client.Do(req)
 	defer res.Body.Close()
 	body, err = ioutil.ReadAll(res.Body)
 
