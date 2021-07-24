@@ -50,14 +50,29 @@ type workouts struct {
 }
 
 type workout struct {
-	Id               string  `json:"id"`
-	StartTimeSeconds uint64  `json:"start_time"`
-	Timezone         string  `json:"timezone"`
-	CurrentPr        bool    `json:"is_total_work_personal_record"`
-	Wtype            string  `json:"fitness_discipline"`
-	Status           string  `json:"status"`
-	Output           float64 `json:"total_work"`
-	Ride             ride    `json:"ride"`
+	Id               string      `json:"id"`
+	StartTimeSeconds uint64      `json:"start_time"`
+	Timezone         string      `json:"timezone"`
+	CurrentPr        bool        `json:"is_total_work_personal_record"`
+	Wtype            string      `json:"fitness_discipline"`
+	Status           string      `json:"status"`
+	Output           float64     `json:"total_work"`
+	Ride             ride        `json:"ride"`
+	EffortZones      effortZones `json:"effort_zones"`
+}
+
+type effortZones struct {
+	TotalEffortPoints float64 `json:"total_effort_points"`
+	HeartRateZoneDurations heartRateZoneDurations `json:"heart_rate_zone_durations"`
+}
+
+type heartRateZoneDurations struct {
+	HrZone1Seconds int `json:"heart_rate_z1_duration"`
+	HrZone2Seconds int `json:"heart_rate_z2_duration"`
+	HrZone3Seconds int `json:"heart_rate_z3_duration"`
+	HrZone4Seconds int `json:"heart_rate_z4_duration"`
+	HrZone5Seconds int `json:"heart_rate_z5_duration"`
+
 }
 
 // Workouts details returned from /api/workout/{id}

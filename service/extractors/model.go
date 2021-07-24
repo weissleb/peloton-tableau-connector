@@ -1,11 +1,11 @@
 package extractors
 
 import (
-	"github.com/weissleb/peloton-tableau-connector/service/clients"
-	"time"
 	"fmt"
-	"reflect"
+	"github.com/weissleb/peloton-tableau-connector/service/clients"
 	"github.com/weissleb/peloton-tableau-connector/service/peloservice"
+	"reflect"
+	"time"
 )
 
 type ClientSession struct {
@@ -22,7 +22,7 @@ type WorkoutsSummary struct {
 type Workouts []Workout
 
 type Workout struct {
-	ExtractTimeUTC     time.Time `csv:"ExtractTimeUTC"`
+	ExtractTimeUTC    time.Time `csv:"ExtractTimeUTC"`
 	Id                string    `csv:"Id"`
 	StartTime         time.Time `csv:"StartTime"`
 	TimeZone          string    `csv:"TimeZone"`
@@ -36,16 +36,27 @@ type Workout struct {
 	RideImageUrl      string    `csv:"RideImageUrl"`
 	RideLengthMinutes int       `csv:"RideLengthMinutes"`
 	//HasWeights         bool      `csv:"HasWeights"`
-	Output             int     `csv:"Output"`
-	AvgWatts           int     `csv:"AvgWatts"`
-	AvgResistance      float64 `csv:"AvgResistance"`
-	AvgCadenceRPM      int     `csv:"AvgCadence"`
-	AvgSpeedMPH        float64 `csv:"AvgSpeedMPH"`
-	AvgSpeedKPH        float64 `csv:"AvgSpeedKPH"`
-	DistanceMiles      float64 `csv:"DistanceMiles"`
-	DistanceKilometers float64 `csv:"DistanceKilometers"`
-	CaloriesBurned     int     `csv:"CaloriesBurned"`
-	AvgHeartRate       float64 `csv:"AvgHeartRate"`
+	Output                int     `csv:"Output"`
+	AvgWatts              int     `csv:"AvgWatts"`
+	AvgResistance         float64 `csv:"AvgResistance"`
+	AvgCadenceRPM         int     `csv:"AvgCadence"`
+	AvgSpeedMPH           float64 `csv:"AvgSpeedMPH"`
+	AvgSpeedKPH           float64 `csv:"AvgSpeedKPH"`
+	DistanceMiles         float64 `csv:"DistanceMiles"`
+	DistanceKilometers    float64 `csv:"DistanceKilometers"`
+	CaloriesBurned        int     `csv:"CaloriesBurned"`
+	AvgHeartRate          float64 `csv:"AvgHeartRate"`
+	StriveScore           float64 `csv:"StiveScore"`
+	HeartRateZone1Seconds int     `csv:"HeartRateZone1Seconds"`
+	HeartRateZone1Percent float64 `csv:"HeartRateZone1Percent"`
+	HeartRateZone2Seconds int     `csv:"HeartRateZone2Seconds"`
+	HeartRateZone2Percent float64 `csv:"HeartRateZone2Percent"`
+	HeartRateZone3Seconds int     `csv:"HeartRateZone3Seconds"`
+	HeartRateZone3Percent float64 `csv:"HeartRateZone3Percent"`
+	HeartRateZone4Seconds int     `csv:"HeartRateZone4Seconds"`
+	HeartRateZone4Percent float64 `csv:"HeartRateZone4Percent"`
+	HeartRateZone5Seconds int     `csv:"HeartRateZone5Seconds"`
+	HeartRateZone5Percent float64 `csv:"HeartRateZone5Percent"`
 }
 
 func (w Workouts) GetAsRecords(withHeader bool) [][]string {
@@ -86,6 +97,17 @@ func (w Workouts) GetAsRecords(withHeader bool) [][]string {
 			fmt.Sprintf("%.2f", workout.DistanceKilometers),
 			fmt.Sprintf("%d", workout.CaloriesBurned),
 			fmt.Sprintf("%.2f", workout.AvgHeartRate),
+			fmt.Sprintf("%.2f", workout.StriveScore),
+			fmt.Sprintf("%d", workout.HeartRateZone1Seconds),
+			fmt.Sprintf("%.2f", workout.HeartRateZone1Percent),
+			fmt.Sprintf("%d", workout.HeartRateZone2Seconds),
+			fmt.Sprintf("%.2f", workout.HeartRateZone2Percent),
+			fmt.Sprintf("%d", workout.HeartRateZone3Seconds),
+			fmt.Sprintf("%.2f", workout.HeartRateZone3Percent),
+			fmt.Sprintf("%d", workout.HeartRateZone4Seconds),
+			fmt.Sprintf("%.2f", workout.HeartRateZone4Percent),
+			fmt.Sprintf("%d", workout.HeartRateZone5Seconds),
+			fmt.Sprintf("%.2f", workout.HeartRateZone5Percent),
 		})
 	}
 

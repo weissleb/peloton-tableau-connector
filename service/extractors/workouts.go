@@ -1,19 +1,19 @@
 package extractors
 
 import (
-	"time"
-	"sort"
-	"log"
+	"fmt"
 	"github.com/weissleb/peloton-tableau-connector/config"
 	"github.com/weissleb/peloton-tableau-connector/service/peloservice"
-	"strings"
-	"strconv"
-	"fmt"
+	"log"
 	"math"
 	"regexp"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
 )
 
-var layout = "2006-01-02 15:04:05"
+//var layout = "2006-01-02 15:04:05"
 
 var (
 	workoutsCache map[string]struct {
@@ -35,24 +35,37 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 	workouts := Workouts{}
 	user := client.GetSessionUser()
 
-	if workouts, ok := workoutsCache[user]; ok {
-		if time.Now().Before(workouts.expire) {
-			log.Print("returning non-expired workouts cache hit for user " + user)
-			return workouts.workouts, nil
+	if config.UseWorkoutCache {
+		if workouts, ok := workoutsCache[user]; ok {
+			if time.Now().Before(workouts.expire) {
+				log.Print("returning non-expired workouts cache hit for user " + user)
+				return workouts.workouts, nil
+			}
+			log.Print("deleting expired workouts cache hit for user " + user)
+			delete(workoutsCache, user)
 		}
-		log.Print("deleting expired workouts cache hit for user " + user)
-		delete(workoutsCache, user)
 	}
 
 	type extraFields struct {
-		Id             string
-		RideDifficulty float64
-		RideImageUrl   string
-		StartTime      time.Time
-		TimeZone       string
+		Id                    string
+		RideDifficulty        float64
+		RideImageUrl          string
+		StartTime             time.Time
+		TimeZone              string
+		StriveScore           float64
+		HeartRateZone1Seconds int
+		HeartRateZone1Percent float64
+		HeartRateZone2Seconds int
+		HeartRateZone2Percent float64
+		HeartRateZone3Seconds int
+		HeartRateZone3Percent float64
+		HeartRateZone4Seconds int
+		HeartRateZone4Percent float64
+		HeartRateZone5Seconds int
+		HeartRateZone5Percent float64
 	}
 	apiWorkoutsMapAbbreviation := make(map[string]extraFields) // Old data come using abbreviation and no daylight savings :-(
-	apiWorkoutsMapOffset := make(map[string]extraFields) // Newer data come using offset.
+	apiWorkoutsMapOffset := make(map[string]extraFields)       // Newer data come using offset.
 
 	// Go get the workouts from the API.
 	page := uint16(0)
@@ -122,15 +135,31 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 			loc, _ := time.LoadLocation(workout.Timezone)
 			st := time.Unix(int64(workout.StartTimeSeconds), 0).In(loc)
 			z, _ := st.Zone()
+			totalHRZone := workout.EffortZones.HeartRateZoneDurations.HrZone1Seconds +
+				workout.EffortZones.HeartRateZoneDurations.HrZone2Seconds +
+				workout.EffortZones.HeartRateZoneDurations.HrZone3Seconds +
+				workout.EffortZones.HeartRateZoneDurations.HrZone4Seconds +
+				workout.EffortZones.HeartRateZoneDurations.HrZone5Seconds
 			// Store keys as day, output, title for matching start time provided with abbreviation and no daylight savings.
 			key := fmt.Sprintf("%s %.0f %s",
 				st.Format(dayLayout), math.Round(workout.Output/1000), strings.ToLower(workout.Ride.Title))
 			apiWorkoutsMapAbbreviation[key] = extraFields{
-				Id:             workout.Id,
-				RideDifficulty: workout.Ride.Difficulty_Rating,
-				RideImageUrl:   workout.Ride.ImageURL,
-				StartTime:      st,
-				TimeZone:       z,
+				Id:                    workout.Id,
+				RideDifficulty:        workout.Ride.Difficulty_Rating,
+				RideImageUrl:          workout.Ride.ImageURL,
+				StartTime:             st,
+				TimeZone:              z,
+				StriveScore:           workout.EffortZones.TotalEffortPoints,
+				HeartRateZone1Seconds: workout.EffortZones.HeartRateZoneDurations.HrZone1Seconds,
+				HeartRateZone1Percent: divZero(workout.EffortZones.HeartRateZoneDurations.HrZone1Seconds, totalHRZone),
+				HeartRateZone2Seconds: workout.EffortZones.HeartRateZoneDurations.HrZone2Seconds,
+				HeartRateZone2Percent: divZero(workout.EffortZones.HeartRateZoneDurations.HrZone2Seconds, totalHRZone),
+				HeartRateZone3Seconds: workout.EffortZones.HeartRateZoneDurations.HrZone3Seconds,
+				HeartRateZone3Percent: divZero(workout.EffortZones.HeartRateZoneDurations.HrZone3Seconds, totalHRZone),
+				HeartRateZone4Seconds: workout.EffortZones.HeartRateZoneDurations.HrZone4Seconds,
+				HeartRateZone4Percent: divZero(workout.EffortZones.HeartRateZoneDurations.HrZone4Seconds, totalHRZone),
+				HeartRateZone5Seconds: workout.EffortZones.HeartRateZoneDurations.HrZone5Seconds,
+				HeartRateZone5Percent: divZero(workout.EffortZones.HeartRateZoneDurations.HrZone5Seconds, totalHRZone),
 			}
 
 			// Store keys as minute, title for matching starting properly provided with offset.
@@ -142,6 +171,17 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 				RideImageUrl:   workout.Ride.ImageURL,
 				StartTime:      st,
 				TimeZone:       z,
+				StriveScore:           workout.EffortZones.TotalEffortPoints,
+				HeartRateZone1Seconds: workout.EffortZones.HeartRateZoneDurations.HrZone1Seconds,
+				HeartRateZone1Percent: divZero(workout.EffortZones.HeartRateZoneDurations.HrZone1Seconds, totalHRZone),
+				HeartRateZone2Seconds: workout.EffortZones.HeartRateZoneDurations.HrZone2Seconds,
+				HeartRateZone2Percent: divZero(workout.EffortZones.HeartRateZoneDurations.HrZone2Seconds, totalHRZone),
+				HeartRateZone3Seconds: workout.EffortZones.HeartRateZoneDurations.HrZone3Seconds,
+				HeartRateZone3Percent: divZero(workout.EffortZones.HeartRateZoneDurations.HrZone3Seconds, totalHRZone),
+				HeartRateZone4Seconds: workout.EffortZones.HeartRateZoneDurations.HrZone4Seconds,
+				HeartRateZone4Percent: divZero(workout.EffortZones.HeartRateZoneDurations.HrZone4Seconds, totalHRZone),
+				HeartRateZone5Seconds: workout.EffortZones.HeartRateZoneDurations.HrZone5Seconds,
+				HeartRateZone5Percent: divZero(workout.EffortZones.HeartRateZoneDurations.HrZone5Seconds, totalHRZone),
 			}
 		}
 	}
@@ -189,27 +229,38 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 			timeZone = extras.TimeZone
 		}
 		workouts = append(workouts, Workout{
-			Id:                 extras.Id,
-			ExtractTimeUTC:     extractTime,
-			StartTime:          startTime,
-			TimeZone:           timeZone,
-			StartTimeUTC:       startTime.UTC(),
-			Type:               w.ClassType,
-			RideTitle:          w.ClassTitle,
-			Instructor:         w.Instructor,
-			RideLengthMinutes:  w.LengthMinutes,
-			RideDifficulty:     extras.RideDifficulty,
-			RideImageUrl:       extras.RideImageUrl,
-			Output:             w.TotalOutput,
-			AvgWatts:           w.AvgWatts,
-			AvgResistance:      avgResistence,
-			AvgCadenceRPM:      w.AvgCadenceRPM,
-			AvgSpeedMPH:        w.AvgSpeedMPH,
-			AvgSpeedKPH:        w.AvgSpeedKPH,
-			DistanceMiles:      w.DistanceMiles,
-			DistanceKilometers: w.DistanceKilometers,
-			CaloriesBurned:     w.CaloriesBurned,
-			AvgHeartRate:       w.AvgHeartRate,
+			Id:                    extras.Id,
+			ExtractTimeUTC:        extractTime,
+			StartTime:             startTime,
+			TimeZone:              timeZone,
+			StartTimeUTC:          startTime.UTC(),
+			Type:                  w.ClassType,
+			RideTitle:             w.ClassTitle,
+			Instructor:            w.Instructor,
+			RideLengthMinutes:     w.LengthMinutes,
+			RideDifficulty:        extras.RideDifficulty,
+			RideImageUrl:          extras.RideImageUrl,
+			Output:                w.TotalOutput,
+			AvgWatts:              w.AvgWatts,
+			AvgResistance:         avgResistence,
+			AvgCadenceRPM:         w.AvgCadenceRPM,
+			AvgSpeedMPH:           w.AvgSpeedMPH,
+			AvgSpeedKPH:           w.AvgSpeedKPH,
+			DistanceMiles:         w.DistanceMiles,
+			DistanceKilometers:    w.DistanceKilometers,
+			CaloriesBurned:        w.CaloriesBurned,
+			AvgHeartRate:          w.AvgHeartRate,
+			StriveScore:           extras.StriveScore,
+			HeartRateZone1Seconds: extras.HeartRateZone1Seconds,
+			HeartRateZone1Percent: extras.HeartRateZone1Percent,
+			HeartRateZone2Seconds: extras.HeartRateZone2Seconds,
+			HeartRateZone2Percent: extras.HeartRateZone2Percent,
+			HeartRateZone3Seconds: extras.HeartRateZone3Seconds,
+			HeartRateZone3Percent: extras.HeartRateZone3Percent,
+			HeartRateZone4Seconds: extras.HeartRateZone4Seconds,
+			HeartRateZone4Percent: extras.HeartRateZone4Percent,
+			HeartRateZone5Seconds: extras.HeartRateZone5Seconds,
+			HeartRateZone5Percent: extras.HeartRateZone5Percent,
 		})
 	}
 
@@ -279,4 +330,11 @@ func GetCyclingWorkoutsSummary(client PelotonClient) (WorkoutsSummary, error) {
 		TotalWorkouts:           workoutCount,
 		LastWorkoutStartTimeUTC: lastWorkout,
 	}, nil
+}
+
+func divZero(a, b int) float64 {
+	if b == 0 {
+		return float64(b)
+	}
+	return float64(a) / float64(b)
 }

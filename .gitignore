@@ -4,3 +4,4 @@ wdc
 bin/
 csvtest/
 workspace.code-workspace
+.vscode/
