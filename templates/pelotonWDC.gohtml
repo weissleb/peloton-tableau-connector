@@ -13,8 +13,8 @@
     <link rel="icon" href="../static/images/favicon.ico"/>
 </head>
 
-<body>
-    <div style="margin: auto; text-align: center; margin-top: 50px; max-width: 300px">
+<body style="font-family:sans-serif; line-height: 1.6">
+    <div style="margin: auto; text-align: center; margin-top: 50px; max-width: 600px">
         <!-- These labels will toggle depending on whether the user is authenticated or not. -->
         <p class="signedin">You are signed in as {{ .UserName }}!</p>
         <div class="notsignedin">
@@ -22,7 +22,7 @@
                 <p>Authentication failed for {{ .UserName }}.  Please try again.</p>
             {{ else }}
                 <p>You are not signed in, please login to Peloton.</p>
-                <p><i>Your credentials are <u>never stored</u>.</i></p>
+                <p><i>Your credentials are <strong>never stored</strong>.</i></p>
             {{ end }}
             <form action="login" method="POST">
                 <input type="text" name="username" placeholder="username">
@@ -34,8 +34,8 @@
         <!-- This link will pull the user's Peloton cycling data once the user is authenticated. -->
         <p><a href="#" class="signedin" id="getcyclingdatalink">Get Cycling Data</a></p>
     </div>
-    <div style="margin: auto; text-align: center; margin-top: 50px; max-width: 500px">
-        <p><strong>Strive score</strong> and <strong>heart rate zones</strong> are here!<br>There are new fields in your data source, so check em out.</p><br>
+    <div style="margin: auto; text-align: center; margin-top: 50px; max-width: 600px">
+        <p><strong>Strive score</strong> and <strong>heart rate zones</strong> are here!<br>There are new fields in your data source (<strong>starting May 2021</strong>), so check em out.</p><br>
         <img src="../static/images/strive.png" height="100" padding="25 0 0 0"/>
     </div>
 </body>
