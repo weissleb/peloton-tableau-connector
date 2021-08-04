@@ -5,45 +5,19 @@ This is a [Tableau Web Data Connector](https://tableau.github.io/webdataconnecto
 > If you've come here looking for good, clean, idiomatic Go code, this is _not_ the repo you are looking for.  Move along ...
 
 # Status
-It's early days for this connector, but I hope, given good feedback, it will progress quickly.  This also means you may encounter bugs, or breaking schema changes.
+This has been live and in use by several Peloton and Tableau enthusiasts since Jan 2021.  No breaking changes have been introduced, nor are they currently contemplated.
 
 ## Availability
-Currently (as of Jan 18, 2021), this is publicly available online in an alpha release, but may be unstable.  You can visit the home page [here](https://www.mypelotondata.com).
+This is publicly available online and free to use.  You can visit the home page [here](https://www.mypelotondata.com).
 
-After receiving feedback and doing a little more testing, my intent is submit this as a [Community Connector](https://tableau.github.io/webdataconnector/community/). 
+My intent is submit this as a [Community Connector](https://tableau.github.io/webdataconnector/community/). 
 
 If you'd like to try the online connector (rather than running it locally), you can head over to [Connect with Tableau Desktop](#connect-with-tableau-desktop), and use the public URL provided.  Or, you can use this locally if you're willing to install and run a lightweight Go executable.  See [Usage](#usage) if you'd like to try it out, and provide feedback.
 
 ## Tables
 This initial version is aimed only at cycling classes.  I built the schema such that I could analyze my personal record ("PR") trends.  For example, do I PR during certain times of day, or days of the week, or with certain instructors?
 
-Therefore, there's only one table right now, called `Workouts`.  It provides one row for each completed cycling workout.  The raw schema is as follows.
-
-|Field Alias|Data Type|Description|
-|--- |--- |--- |
-|Extract Time UTC|Datetime|The time in UTC that the data were extracted from Peloton.|
-|Id|String|A unique identifier for the workout, assigned by Peloton.|
-|Start Time|Datetime|The local time you started the class.|
-|Time Zone|String|The time zone you were in when you took the class.|
-|Start Time UTC|Datetime|The time in UTC you started the class.|
-|Was PR|Boolean|Indicates whether or not you achieved a personal record in this workout for the ride length.|
-|Current PR|Boolean|Indicates whether or not this workout is your current personal record for the ride length|
-|Type|String|The type of ride such as Beginner, Climb, Live DJ, Intervals, Music, etc.|
-|Ride Title|String|The descriptive title of the ride.|
-|Ride Difficulty|Float|The average difficulty rating of the ride.|
-|Instructor|String|The name of the ride instructor.|
-|Ride Image Url|String|The URL to the image shown depicting the ride.|
-|Ride Length Minutes|Integer|The length in minutes the ride was scheduled for.|
-|Output|Integer|The total output in kj.|
-|Avg Watts|Integer|The average output in watts.|
-|Avg Resistence|Float|The average resistance as a percentage.|
-|Avg Cadence RPM|Integer|The average cadence in rpm.|
-|Avg Speed MPH|Float|The average speed in mph.  This will be 0 if your Peloton display preferences are Kilometers.|
-|Avg Speed KPH|Float|The average speed in kph.  This will be 0 if your Peloton display preferences are Miles.|
-|Distance Miles|Float|The total distance traveled in miles.  This will be 0 if your Peloton display preferences are Kilometers.|
-|Distance Kilometers|Float|The total distance traveled in kilometers.  This will be 0 if your Peloton display preferences are Miles.|
-|Calories Burned|Integer|The total calories burned in kcal.|
-|Avg Heart Rate|Float|The average heart rate in bpm.|
+Therefore, there's only one table right now, called `Workouts`.  It provides one row for each completed cycling workout.  The raw schema can be [viewed here](https://www.mypelotondata.com/home#data).
 
 As feedback rolls in, more fields and tables may be added.
 
