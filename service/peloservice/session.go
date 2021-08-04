@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"io/ioutil"
 	"encoding/json"
-	"errors"
 	"github.com/weissleb/peloton-tableau-connector/service/clients"
 )
 
@@ -16,7 +15,7 @@ func GetSession(client clients.HttpClientInterface, username string, password st
 	userSession := UserSession{}
 	session := session{}
 
-	path := fmt.Sprintf("/auth/login")
+	path := "/auth/login"
 	requesturl := BaseUrl + path
 	method := "POST"
 
@@ -36,7 +35,7 @@ func GetSession(client clients.HttpClientInterface, username string, password st
 	}
 	req.Header.Add("Content-Type", "application/vnd.api+json")
 
-	res, err = client.Do(req)
+	res, _ = client.Do(req)
 	defer res.Body.Close()
 	body, err = ioutil.ReadAll(res.Body)
 
@@ -55,7 +54,7 @@ func GetSession(client clients.HttpClientInterface, username string, password st
 		return userSession, nil
 	}
 
-	return UserSession{}, errors.New(fmt.Sprintf("%d", res.StatusCode))
+	return UserSession{}, fmt.Errorf(fmt.Sprintf("%d", res.StatusCode))
 
 
 }
