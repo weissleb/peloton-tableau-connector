@@ -11,33 +11,42 @@
     <script src="https://connectors.tableau.com/libs/tableauwdc-2.3.latest.js" type="text/javascript"></script>
     <script src="../static/scripts/pelotonWDC.js" type="text/javascript"></script>
     <link rel="icon" href="../static/images/favicon.ico"/>
+    <link rel="stylesheet" href="../static/css/loginstyle.css"/>
 </head>
 
 <body style="font-family:sans-serif; line-height: 1.6">
-    <div style="margin: auto; text-align: center; margin-top: 50px; max-width: 600px">
-        <!-- These labels will toggle depending on whether the user is authenticated or not. -->
-        <p class="signedin">You are signed in as {{ .UserName }}!</p>
-        <div class="notsignedin">
-            {{ if .FailedAuth }}
-                <p>Authentication failed for {{ .UserName }}.  Please try again.</p>
-            {{ else }}
-                <p>You are not signed in, please login to Peloton.</p>
-                <p><i>Your credentials are <strong>never stored</strong>.</i></p>
-            {{ end }}
-            <form action="login" method="POST">
-                <input type="text" name="username" placeholder="username">
-                <input type="password" name="password" placeholder="password" required>
-                <input type="submit" value="Submit">
-            </form>
-        </div>
+    <div style="height: 600px">
+        <div style="margin: auto; text-align: center; margin-top: 50px; max-width: 600px;">
+            <!-- These labels will toggle depending on whether the user is authenticated or not. -->
+            <p class="signedin">You are signed in as {{ .UserName }}!</p>
+            <div class="notsignedin">
+                {{ if .FailedAuth }}
+                    <p>Authentication failed for {{ .UserName }}.  Please try again.</p>
+                {{ else }}
+                    <p>You are not signed in, please login to Peloton.</p>
+                    <p><i>Your credentials are <strong>never stored</strong>.</i></p>
+                {{ end }}
+                <form action="login" method="POST">
+                    <input type="text" name="username" placeholder="username">
+                    <input type="password" name="password" placeholder="password" required>
+                    <input type="submit" value="Submit">
+                </form>
+            </div>
 
-        <!-- This link will pull the user's Peloton cycling data once the user is authenticated. -->
-        <p><a href="#" class="signedin" id="getcyclingdatalink">Get Cycling Data</a></p>
-    </div>
-    <div style="margin: auto; text-align: center; margin-top: 50px; max-width: 600px">
-        <p><strong>Strive score</strong> and <strong>heart rate zones</strong> are here!<br>There are new fields in your data source (<strong>starting May 2021</strong>), so check em out.</p><br>
-        <img src="../static/images/strive.png" height="100" padding="25 0 0 0"/>
+            <!-- This link will pull the user's Peloton cycling data once the user is authenticated. -->
+            <p><a href="#" class="signedin" id="getcyclingdatalink">Get Cycling Data</a></p>
+        </div>
+        <div style="margin: auto; text-align: center; margin-top: 50px; max-width: 600px">
+            <p><strong>Strive score</strong> and <strong>heart rate zones</strong> are here!<br>There are new fields in your data source (<strong>starting May 2021</strong>), so check em out.</p><br>
+            <img src="../static/images/strive.png" height="100" padding="25 0 0 0"/>
+        </div>
+        <div style="margin: auto; text-align: center; margin-top: 50px; max-width: 600px" class="contact">
+            <img src="../static/images/favicon.png" width="32px"> <a href="https://www.mypelotondata.com/" target="_blank">home page</a>
+            &nbsp;
+            <img src="../static/images/twitter-circle-32.png" width="32px"> <a href="https://twitter.com/weissleb" target="_blank">@weissleb</a>
+            &nbsp;
+            <img src="../static/images/GitHub-Mark-64px.png" width="32px"> <a href="https://github.com/weissleb/peloton-tableau-connector/issues" target="_blank">github
+        </div>
     </div>
 </body>
-
 </html>
