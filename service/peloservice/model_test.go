@@ -1,8 +1,10 @@
 package peloservice
 
 import (
-	"testing"
 	"encoding/json"
+	"strconv"
+	"testing"
+
 	"github.com/gocarina/gocsv"
 )
 
@@ -85,7 +87,7 @@ func TestJson(t *testing.T) {
 func TestCsvUS(t *testing.T) {
 	workoutsResponse := []byte(`
 Workout Timestamp,Live/On-Demand,Instructor Name,Length (minutes),Fitness Discipline,Type,Title,Class Timestamp,Total Output,Avg. Watts,Avg. Resistance,Avg. Cadence (RPM),Avg. Speed (mph),Distance (mi),Calories Burned,Avg. Heartrate,Avg. Incline,Avg. Pace (min/mi)
-2018-02-22 17:25 (EST),Live,,15,Cycling,Scenic Ride,15 min Venice Scenic Ride,,46,52,25%,93,11.87,2.96,63,,,
+2018-02-22 17:25 (EST),Live,,25,Cycling,Ema Lovewell,15 min HIT,,46,52,25%,93,11.87,2.96,63,,,
 `)
 
 	var (
@@ -99,7 +101,7 @@ Workout Timestamp,Live/On-Demand,Instructor Name,Length (minutes),Fitness Discip
 		t.Fatal(err)
 	}
 
-	want = "15 min Venice Scenic Ride"
+	want = "15 min HIT"
 	got = workouts[0].ClassTitle
 	if got != want {
 		t.Fatalf("got: %s; want %s\n", got, want)
@@ -125,6 +127,39 @@ Workout Timestamp,Live/On-Demand,Instructor Name,Length (minutes),Fitness Discip
 
 	want = 15.63
 	got = workouts[0].DistanceKilometers
+	if got != want {
+		t.Fatalf("got: %s; want %s\n", got, want)
+	}
+}
+
+
+func TestCsvUSScenic(t *testing.T) {
+	workoutsResponse := []byte(`
+Workout Timestamp,Live/On-Demand,Instructor Name,Length (minutes),Fitness Discipline,Type,Title,Class Timestamp,Total Output,Avg. Watts,Avg. Resistance,Avg. Cadence (RPM),Avg. Speed (mph),Distance (mi),Calories Burned,Avg. Heartrate,Avg. Incline,Avg. Pace (min/mi)
+2018-02-22 17:25 (EST),Live,,None,Cycling,Scenic Ride,15 min Venice Scenic Ride,,46,52,25%,93,11.87,2.96,63,,,
+`)
+
+	var (
+		err        error
+		workouts   exportedWorkouts
+		want       interface{}
+		got        interface{}
+	)
+
+	if err = gocsv.UnmarshalBytes(workoutsResponse, &workouts); err != nil {
+		t.Fatal(err)
+	}
+
+	want = "15 min Venice Scenic Ride"
+	got = workouts[0].ClassTitle
+	if got != want {
+		t.Fatalf("got: %s; want %s\n", got, want)
+	}
+
+	want = 0
+	if got, err = strconv.Atoi(workouts[0].LengthMinutes); err != nil {
+		got = 0
+	}
 	if got != want {
 		t.Fatalf("got: %s; want %s\n", got, want)
 	}
