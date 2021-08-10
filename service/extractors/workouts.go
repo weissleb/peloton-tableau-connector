@@ -51,6 +51,7 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 		RideDifficulty        float64
 		RideImageUrl          string
 		StartTime             time.Time
+		EndTime               time.Time
 		TimeZone              string
 		StriveScore           float64
 		HeartRateZone1Seconds int
@@ -134,6 +135,7 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 		for _, workout := range apiWorkouts.Workouts {
 			loc, _ := time.LoadLocation(workout.Timezone)
 			st := time.Unix(int64(workout.StartTimeSeconds), 0).In(loc)
+			et := time.Unix(int64(workout.EndTimeSeconds), 0).In(loc)
 			z, _ := st.Zone()
 			totalHRZone := workout.EffortZones.HeartRateZoneDurations.HrZone1Seconds +
 				workout.EffortZones.HeartRateZoneDurations.HrZone2Seconds +
@@ -148,6 +150,7 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 				RideDifficulty:        workout.Ride.Difficulty_Rating,
 				RideImageUrl:          workout.Ride.ImageURL,
 				StartTime:             st,
+				EndTime:               et,
 				TimeZone:              z,
 				StriveScore:           workout.EffortZones.TotalEffortPoints,
 				HeartRateZone1Seconds: workout.EffortZones.HeartRateZoneDurations.HrZone1Seconds,
@@ -166,11 +169,12 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 			key = fmt.Sprintf("%s %s",
 				st.Format(minuteLayout), strings.ToLower(workout.Ride.Title))
 			apiWorkoutsMapOffset[key] = extraFields{
-				Id:             workout.Id,
-				RideDifficulty: workout.Ride.Difficulty_Rating,
-				RideImageUrl:   workout.Ride.ImageURL,
-				StartTime:      st,
-				TimeZone:       z,
+				Id:                    workout.Id,
+				RideDifficulty:        workout.Ride.Difficulty_Rating,
+				RideImageUrl:          workout.Ride.ImageURL,
+				StartTime:             st,
+				EndTime:               et,
+				TimeZone:              z,
 				StriveScore:           workout.EffortZones.TotalEffortPoints,
 				HeartRateZone1Seconds: workout.EffortZones.HeartRateZoneDurations.HrZone1Seconds,
 				HeartRateZone1Percent: divZero(workout.EffortZones.HeartRateZoneDurations.HrZone1Seconds, totalHRZone),
@@ -228,6 +232,15 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 			startTime = extras.StartTime
 			timeZone = extras.TimeZone
 		}
+
+		// Distance based scenic rides report "None" for length minutes, 
+		// and unfortunately "Scenic Ride" for name, so our current key
+		// structure doesn't work.  Just set length to 0 for now.
+		var lengthMinutes int
+		if lengthMinutes, err = strconv.Atoi(w.LengthMinutes); err != nil {
+			lengthMinutes = 0
+		}
+
 		workouts = append(workouts, Workout{
 			Id:                    extras.Id,
 			ExtractTimeUTC:        extractTime,
@@ -237,7 +250,7 @@ func ExtractCyclingWorkouts(client PelotonClient) (Workouts, error) {
 			Type:                  w.ClassType,
 			RideTitle:             w.ClassTitle,
 			Instructor:            w.Instructor,
-			RideLengthMinutes:     w.LengthMinutes,
+			RideLengthMinutes:     lengthMinutes,
 			RideDifficulty:        extras.RideDifficulty,
 			RideImageUrl:          extras.RideImageUrl,
 			Output:                w.TotalOutput,

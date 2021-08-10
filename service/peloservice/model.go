@@ -26,7 +26,7 @@ type exportedWorkout struct {
 	StartTime          string  `csv:"Workout Timestamp"`
 	LiveOrOnDemand     string  `csv:"Live/On-Demand"`
 	Instructor         string  `csv:"Instructor Name"`
-	LengthMinutes      int     `csv:"Length (minutes)"`
+	LengthMinutes      string  `csv:"Length (minutes)"`
 	FitnessDiscipline  string  `csv:"Fitness Discipline"`
 	ClassType          string  `csv:"Type"`
 	ClassTitle         string  `csv:"Title"`
@@ -52,6 +52,7 @@ type workouts struct {
 type workout struct {
 	Id               string      `json:"id"`
 	StartTimeSeconds uint64      `json:"start_time"`
+	EndTimeSeconds   uint64      `json:"end_time"`
 	Timezone         string      `json:"timezone"`
 	CurrentPr        bool        `json:"is_total_work_personal_record"`
 	Wtype            string      `json:"fitness_discipline"`
@@ -62,7 +63,7 @@ type workout struct {
 }
 
 type effortZones struct {
-	TotalEffortPoints float64 `json:"total_effort_points"`
+	TotalEffortPoints      float64                `json:"total_effort_points"`
 	HeartRateZoneDurations heartRateZoneDurations `json:"heart_rate_zone_durations"`
 }
 
@@ -72,7 +73,6 @@ type heartRateZoneDurations struct {
 	HrZone3Seconds int `json:"heart_rate_z3_duration"`
 	HrZone4Seconds int `json:"heart_rate_z4_duration"`
 	HrZone5Seconds int `json:"heart_rate_z5_duration"`
-
 }
 
 // Workouts details returned from /api/workout/{id}
