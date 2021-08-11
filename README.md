@@ -1,4 +1,4 @@
-# Peloton Tableau Connector
+# Peloton Tableau Connector ([Home Page](https://www.mypelotondata.com/))
 This is a [Tableau Web Data Connector](https://tableau.github.io/webdataconnector/#) for visualizing your personal Peloton cycling data inside of Tableau.
 
 > DISCLAIMER
@@ -8,11 +8,9 @@ This is a [Tableau Web Data Connector](https://tableau.github.io/webdataconnecto
 This has been live and in use by several Peloton and Tableau enthusiasts since Jan 2021.  No breaking changes have been introduced, nor are they currently contemplated.
 
 ## Availability
-This is publicly available online and free to use.  You can visit the home page [here](https://www.mypelotondata.com).
+This is publicly available online and free to use, and is an official Tableau [Community Connector](https://tableau.github.io/webdataconnector/community/).  You can visit the home page [here](https://www.mypelotondata.com).
 
-My intent is submit this as a [Community Connector](https://tableau.github.io/webdataconnector/community/). 
-
-If you'd like to try the online connector (rather than running it locally), you can head over to [Connect with Tableau Desktop](#connect-with-tableau-desktop), and use the public URL provided.  Or, you can use this locally if you're willing to install and run a lightweight Go executable.  See [Usage](#usage) if you'd like to try it out, and provide feedback.
+If you'd like to try the official Tableau connector (rather than running it locally), you can head over to [Connect with Tableau Desktop](https://www.mypelotondata.com/home#tableau), and use the public URL provided.  Or, you can use this locally if you're willing to install and run a lightweight Go executable.  See [Usage](#usage) if you'd like to try it out, and provide feedback.
 
 ## Tables
 This initial version is aimed only at cycling classes.  I built the schema such that I could analyze my personal record ("PR") trends.  For example, do I PR during certain times of day, or days of the week, or with certain instructors?
@@ -71,7 +69,7 @@ _If necessary, allow connections._
 ## Connect with Tableau Desktop
 Install [Tableau Desktop](https://public.tableau.com/en-us/s/download), if you haven't already.
 
-Open Tableau, and use the Web Data Connector option.  If you're running this locally, enter `http://localhost:<port>/wdc` (e.g `http://localhost:8889/wdc`).  If you're connecting to the online version (currently in alpha, and likely unstable), enter `https://www.mypelotondata.com/wdc`.
+Open Tableau, and use the Web Data Connector option.  If you're running this locally, enter `http://localhost:<port>/wdc` (e.g `http://localhost:8889/wdc`).  If you're connecting to the online version, enter `https://www.mypelotondata.com/wdc`.
 
 Enter your Peloton credentials.
 
