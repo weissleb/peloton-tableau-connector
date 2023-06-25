@@ -5,3 +5,5 @@ bin/
 csvtest/
 workspace.code-workspace
 .vscode/
+static/.DS_Store
+static/images/.DS_Store

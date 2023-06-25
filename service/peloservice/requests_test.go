@@ -1,19 +1,19 @@
 package peloservice
 
 import (
-	"log"
-	"testing"
-	"net/http"
-	"io/ioutil"
 	"bytes"
-	"reflect"
 	"github.com/weissleb/peloton-tableau-connector/service/clients"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"reflect"
+	"testing"
 )
 
 var httpClient clients.HttpClientInterface
 
 func init() {
-	log.Printf("initializing mock client", )
+	log.Printf("initializing mock client")
 	httpClient = &clients.MockClient{}
 }
 
@@ -341,6 +341,7 @@ func TestGetWorkouts(t *testing.T) {
 						Id:               "cfc1ea921353437caf8630825dd6d8b6",
 						CurrentPr:        true,
 						StartTimeSeconds: 1600435852,
+						EndTimeSeconds:   1600438549,
 						Timezone:         "America/New_York",
 						Wtype:            "cycling",
 						Status:           "COMPLETE",
@@ -350,6 +351,7 @@ func TestGetWorkouts(t *testing.T) {
 						Id:               "4f00f7c891e24584ba3505ff946556b9",
 						CurrentPr:        false,
 						StartTimeSeconds: 1600347572,
+						EndTimeSeconds:   1600349370,
 						Timezone:         "America/New_York",
 						Wtype:            "cycling",
 						Status:           "COMPLETE",
@@ -824,7 +826,10 @@ func TestGetRide(t *testing.T) {
 					Name:     "Kendall Toole",
 					ImageURL: "https://s3.amazonaws.com/workout-metric-images-prod/fb0c6a5efaa142aba993047915423174",
 				},
-				Equipmenttags: []struct{ Slug string `json:"slug"` }{
+				ImageURL: "https://s3.amazonaws.com/peloton-ride-images/02ccb5d3c70c82936fed06f9636cee838c207044/img_1599496590_6d90d0e9f45e4f01b64922b8205b6950.png",
+				Equipmenttags: []struct {
+					Slug string `json:"slug"`
+				}{
 					{
 						Slug: "light_weights",
 					},

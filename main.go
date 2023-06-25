@@ -1,23 +1,25 @@
 package main
 
 import (
-	"net/http"
-	"github.com/gorilla/mux"
-	"html/template"
-	"log"
-	"fmt"
-	"github.com/weissleb/peloton-tableau-connector/config"
-	"io/ioutil"
+	"crypto/sha1"
 	"encoding/gob"
 	"encoding/json"
+	"fmt"
+	"html/template"
+	"io/ioutil"
+	"log"
+	"net"
+	"net/http"
+	"os"
+	"runtime"
 	"strings"
 	"time"
-	"github.com/weissleb/peloton-tableau-connector/service/servicehandlers"
-	"os"
-	"net"
+
+	"github.com/gofrs/uuid/v3"
+	"github.com/gorilla/mux"
+	"github.com/weissleb/peloton-tableau-connector/config"
 	"github.com/weissleb/peloton-tableau-connector/googleanalytics"
-	"github.com/gofrs/uuid"
-	"crypto/sha1"
+	"github.com/weissleb/peloton-tableau-connector/service/servicehandlers"
 )
 
 const (
@@ -61,10 +63,10 @@ func main() {
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	r.PathPrefix("/doc-images/").Handler(http.StripPrefix("/doc-images/", http.FileServer(http.Dir("doc-images"))))
 
-	r.HandleFunc("/home", homeHandler)
+	r.HandleFunc("/home", goodbyeHandler) // was homeHandler
 	r.Handle("/", http.RedirectHandler("/home", http.StatusFound))
 	r.Handle("/peloton-wdc", http.RedirectHandler("/wdc", http.StatusFound))
-	r.HandleFunc("/wdc", WdcHandler)
+	r.HandleFunc("/wdc", goodbyeHandler) // was WdcHandler
 	r.HandleFunc("/login", authHandler)
 	r.HandleFunc("/cycling/schema/{table}", cyclingSchema)
 	r.HandleFunc("/cycling/data/{table}", cyclingData)
@@ -82,6 +84,7 @@ func main() {
 
 	// start server
 	fmt.Println(config.Banner)
+	fmt.Printf("go version is %s\n", runtime.Version())
 	fmt.Printf("connector is on port %s\n", port)
 
 	authMessage := "off"
@@ -97,6 +100,11 @@ func main() {
 	log.Printf("caching of workouts is %s", cacheMessage)
 
 	log.Fatal(http.ListenAndServe(":"+port, r))
+}
+
+func goodbyeHandler(w http.ResponseWriter, r *http.Request) {
+
+	tpl.ExecuteTemplate(w, "goodbye.gohtml", nil)
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
