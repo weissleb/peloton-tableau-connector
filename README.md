@@ -1,16 +1,14 @@
 # Peloton Tableau Connector ([Home Page](https://www.mypelotondata.com/))
-This is a [Tableau Web Data Connector](https://tableau.github.io/webdataconnector/#) for visualizing your personal Peloton cycling data inside of Tableau.
+This ~~is~~ was a [Tableau Web Data Connector](https://tableau.github.io/webdataconnector/#) for visualizing your personal Peloton cycling data inside of Tableau.  Unfotunately if seems that Tableau Public __no longer supports Web Data Connectors__.  Feel free to fork this repo if you'd like to run it yourself.
 
 > DISCLAIMER
 > If you've come here looking for good, clean, idiomatic Go code, this is _not_ the repo you are looking for.  Move along ...
 
 # Status
-This has been live and in use by several Peloton and Tableau enthusiasts since Jan 2021.  No breaking changes have been introduced, nor are they currently contemplated.
+This ~~has~~ had been live and in use by several Peloton and Tableau enthusiasts since Jan 2021.  No breaking changes have been introduced, nor are they currently contemplated.
 
 ## Availability
-This is publicly available online and free to use, and is an official Tableau [Community Connector](https://tableau.github.io/webdataconnector/community/).  You can visit the home page [here](https://www.mypelotondata.com).
-
-If you'd like to try the official Tableau connector (rather than running it locally), you can head over to [Connect with Tableau Desktop](https://www.mypelotondata.com/home#tableau), and use the public URL provided.  Or, you can use this locally if you're willing to install and run a lightweight Go executable.  See [Usage](#usage) if you'd like to try it out, and provide feedback.
+Unfotunately if seems that Tableau Public __no longer supports Web Data Connectors__, so this is no longer available publicly.  Feel free to fork this repo if you'd like to run it yourself.
 
 ## Tables
 This initial version is aimed only at cycling classes.  I built the schema such that I could analyze my personal record ("PR") trends.  For example, do I PR during certain times of day, or days of the week, or with certain instructors?
